@@ -162,8 +162,9 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#B92D29',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'PoppinsBold',
     marginLeft: 4,
+    marginTop: 2,
   },
 });
 
