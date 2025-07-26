@@ -13,6 +13,7 @@ import ProfileScreen from '../../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
+
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
     <View style={styles.tabBarContainer}>
@@ -36,13 +37,13 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
           const getIcon = () => {
             switch (route.name) {
-              case 'Home':
+              case 'Vigilaid ⚚ Home                     ⛨':
                 return 'home';
-              case 'Learn':
+              case 'Vigilaid ⚚ Learn                      ⛨':
                 return 'book';
-              case 'Forum':
+              case 'Vigilaid ⚚ Forum                    ⛨':
                 return 'forum';
-              case 'Profile':
+              case 'Vigilaid ⚚ Profile                    ⛨':
                 return 'person';
               default:
                 return 'home';
@@ -61,7 +62,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
               <MaterialIcons
                 name={getIcon()}
                 size={20}
-                color={isFocused ? '#FFFFFF' : '#6b6b6b'}
+                color={isFocused ? '#B92D29' : '#ffffff'}
+                shadowColor={isFocused ? 'transparent' : 'black'}
               />
               {isFocused && (
                 <Text style={styles.activeTabText}>{label}</Text>
@@ -78,12 +80,6 @@ const App = () => {
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#B92D29" />
-      
-      <View style={{ flex: 1 }}>
-        <LinearGradient colors={['#ffe5e5', '#fff0f0','#ffcccc']}
-            style={StyleSheet.absoluteFill} 
-            start={{ x:0, y:0}}
-            end={{x:1,y:1}}/>
 
         <Tab.Navigator
           tabBar={(props) => <CustomTabBar {...props} />}
@@ -93,33 +89,32 @@ const App = () => {
             },
             headerTintColor: '#fff',
             headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 20,
+              fontSize: 28,
+              fontFamily: 'PoppinsBold',
             },
           }}
         >
           <Tab.Screen 
-            name="Home" 
+            name={"Vigilaid ⚚ Home                     ⛨"}
             component={HomeScreen as React.FC}
             options={{ tabBarLabel: 'Home' }}
           />
           <Tab.Screen 
-            name="Learn" 
+            name="Vigilaid ⚚ Learn                      ⛨" 
             component={LearnScreen as React.FC}
             options={{ tabBarLabel: 'Learn' }}
           />
           <Tab.Screen 
-            name="Forum" 
+            name="Vigilaid ⚚ Forum                    ⛨" 
             component={ForumScreen as React.FC}
             options={{ tabBarLabel: 'Forum' }}
           />
           <Tab.Screen 
-            name="Profile" 
+            name="Vigilaid ⚚ Profile                    ⛨" 
             component={ProfileScreen as React.FC}
             options={{ tabBarLabel: 'Profile' }}
           />
         </Tab.Navigator>
-      </View>
     </>
   );
 };
@@ -134,7 +129,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#B92D29',
     borderRadius: 35,
     paddingVertical: 8,
     paddingHorizontal: 8,
@@ -160,12 +155,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   activeTabItem: {
-    backgroundColor: '#B92D29',
+    backgroundColor: '#ffffff',
     flexDirection: 'row',
     alignItems: 'center',
   },
   activeTabText: {
-    color: '#FFFFFF',
+    color: '#B92D29',
     fontSize: 12,
     fontWeight: '500',
     marginLeft: 4,

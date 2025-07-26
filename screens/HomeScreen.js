@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
-import {MaterialIcon} from '@expo/vector-icons';
+import {MaterialIcons} from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import NoiseOverlay from '@/components/noiseBackground';
 
 const {width} = Dimensions.get('window');
 
@@ -24,59 +25,87 @@ const HomeScreen = () => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-           <View style={{ flex: 1 }}>
-             <LinearGradient colors={['#ffe5e5', '#fff0f0','#ffcccc']}
+        <View style={styles.container}>
+            {/* Base Gradient Background */}
+            <LinearGradient 
+                colors={['#a60000ff', '#fcf4f4eb','#ffffff','#fdfbf9','#a60000ff']}
                 style={StyleSheet.absoluteFill} 
-                start={{ x:0, y:0}}
-                end={{x:1,y:1}}/>
+                start={{ x:-1, y:1}}
+                end={{x:1,y:1.4}}
+            />
+            
+            {/* Noise Texture Overlay - Now properly tiled */}
+            <NoiseOverlay opacity={1.9} />
+            
+            {/* Scrollable Content */}
+            <ScrollView 
+                style={styles.scrollContainer} 
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}>
 
+                <View style={styles.emergencySection}>
+                    <Text style={styles.emergencyTitle}>Emergency</Text>
 
-             <View style={styles.emergencySection}>
-                <Text style={styles.emergencyTitle}>Emergency</Text>
-
-                <TouchableOpacity style={styles.sendGPSButton} onPress={handleEmergencyAlert} activeOpacity={0.8}>
-                    <LinearGradient
-                        colors={['#1F2937', '#111827']}
-                        style={styles.gradientButton}>
+                    <TouchableOpacity 
+                        style={styles.sendGPSButton} 
+                        onPress={handleEmergencyAlert} 
+                        activeOpacity={0.9}>
+                        <LinearGradient
+                            colors={['#530404', '#8B0000']}
+                            style={styles.gradientButton}>
                             <Text style={styles.sendGPSButtonText}>Send GPS Location</Text>
-                    </LinearGradient>
-                        
-                </TouchableOpacity>
-             </View>
-            </View>
-        </ScrollView>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'transparent',
+    },
+    scrollContainer: {
+        flex: 1,
+        backgroundColor: 'transparent',
+    },
+    scrollContent: {
         padding: 20,
+        minHeight: '100%',
+        paddingBottom: 100, // Space for tab bar
     },
     emergencySection: {
-        backgroundColor: '#B92D29',
-        borderRadius: 10,
+        backgroundColor: 'rgba(255, 236, 238, 0.95)', // Added transparency to show texture beneath
+        borderColor: '#530404',
+        borderWidth: 2.5,
+        borderRadius: 20,
         padding: 20,
         marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     emergencyTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#530404',
         marginBottom: 10,
     },
     sendGPSButton: {
-        backgroundColor: '#fff',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    gradientButton: {
         paddingVertical: 15,
-        borderRadius: 5,
         alignItems: 'center',
     },
     sendGPSButtonText: {
         fontSize: 16,
-        color: '#B92D29',
+        color: '#fff',
         fontWeight: 'bold',
     }
 });
