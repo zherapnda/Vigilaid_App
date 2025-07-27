@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import { StatusBar, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import NoiseOverlay from '@/components/noiseBackground';
 
 import ForumScreen from '../../screens/ForumScreen';
 import HomeScreen from '../../screens/HomeScreen';
@@ -17,7 +18,9 @@ const Tab = createBottomTabNavigator();
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
     <View style={styles.tabBarContainer}>
+    <NoiseOverlay opacity={0.7} />
       <View style={styles.tabBar}>
+        <NoiseOverlay opacity={0.7} />
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = options.tabBarLabel || route.name;
@@ -59,10 +62,11 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                 isFocused && styles.activeTabItem
               ]}
             >
+              <NoiseOverlay opacity={0.2} />
               <MaterialIcons
                 name={getIcon()}
                 size={20}
-                color={isFocused ? '#B92D29' : '#ffffff'}
+                color={isFocused ? '#530404' : '#ffffff'}
                 shadowColor={isFocused ? 'transparent' : 'black'}
               />
               {isFocused && (
@@ -80,12 +84,12 @@ const App = () => {
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#B92D29" />
-
+      <NoiseOverlay opacity={1.0} />
         <Tab.Navigator
           tabBar={(props) => <CustomTabBar {...props} />}
           screenOptions={{
             headerStyle: {
-              backgroundColor: '#B92D29',
+              backgroundColor: '#530404',
             },
             headerTintColor: '#fff',
             headerTitleStyle: {
@@ -129,7 +133,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#B92D29',
+    backgroundColor: '#530404',
     borderRadius: 35,
     paddingVertical: 8,
     paddingHorizontal: 8,
@@ -160,7 +164,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeTabText: {
-    color: '#B92D29',
+    color: '#530404',
     fontSize: 12,
     fontFamily: 'PoppinsBold',
     marginLeft: 4,
