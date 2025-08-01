@@ -184,7 +184,7 @@ const LearnScreen = ({ navigation }) => {
             
             {/* Background */}
             <LinearGradient 
-                colors={['#a60000ff', '#fcf4f4eb','#ffffff','#fdfbf9','#a60000ff']}
+                colors={['#fdd1d1ff', '#fcf4f4eb','#ffffff','#fdfbf9','#a60000ff']}
                 style={StyleSheet.absoluteFill} 
                 start={{ x:-1, y:1}}
                 end={{x:1,y:1.4}}
@@ -197,49 +197,46 @@ const LearnScreen = ({ navigation }) => {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}>
 
-                {/* Title Header */}
-                <View style={styles.titleContainer}>
-                    <Text style={styles.mainTitle}>Emergency Training</Text>
-                    <Text style={styles.mainSubtitle}>Be prepared. Save lives.</Text>
-                </View>
-
-                {/* Progress Box with Yellow Accent */}
-                <Animated.View style={[styles.progressBox, { opacity: fadeAnim }]}>
-                    <LinearGradient
-                        colors={['#FFC107', '#ffffff', '#FFC107']}
-                        style={styles.progressBoxGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}>
-                        <NoiseOverlay opacity={0.6} />
-                       
-                        <View style={styles.progressBoxContent}>
-                            <View style={styles.statItem}>
-                               <View style={[styles.statIconCircle, { borderColor: '#F57C00' }]}>
-                                   <MaterialIcons name="school" size={28} color="#F57C00" />
-                               </View>
-                               <Text style={[styles.statNumber, { color: '#F57C00' }]}>{stats.totalCompleted}/{stats.totalLessons}</Text>
-                               <Text style={styles.statLabel}>Lessons Completed</Text>
-                            </View>
-
-                            <View style={[styles.statDivider, { backgroundColor: 'rgba(245, 124, 0, 0.3)' }]} />
-
-                            <View style={styles.statItem}>
-                                <View style={[styles.statIconCircle, { borderColor: '#F57C00' }]}>
-                                    <MaterialIcons name="stars" size={28} color="#FFB300" />
+            
+                <LinearGradient
+                                    colors={['#BB2B29', '#ffffff', '#BB2B29']}
+                                    style={styles.scoreSection}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}>
+                
+                                    <NoiseOverlay opacity={1.0} />
+                
+                                    <View style={styles.scoreHeader}>
+                                        <View style={styles.mythIconCircle}>
+                                            <MaterialIcons name="medical-services" size={24} color="#530404" />
+                                        </View>
+                                        <Text style={styles.scoreTitle}>First-Aid Kit</Text>
+                                    </View>
+                
+                                    <View style={styles.progressContainer}>
+                                        <NoiseOverlay opacity={2.3} />
+                                        
+                        
+                        
+                                    <View style={styles.progressDetails}>
+                                        <View style={styles.scoreBadge}>
+                                            <Text style={styles.scorePoints}>Points:</Text>
+                                        </View>
+                                        
+                            
+                                    <View style={styles.badgeInfo}>
+                                        <View style={styles.mythIconCircle}>
+                                            <MaterialIcons name="emoji-events" size={20} color="#BB2B29" />
+                                        </View>
+                                        <Text style={styles.badgeText}>me</Text>
+                                    </View>
                                 </View>
-                                <Text style={[styles.statNumber, { color: '#F57C00' }]}>{stats.totalPoints}</Text>
-                                <Text style={styles.statLabel}>Points</Text>
-                            </View>
-                        </View>
-                    </LinearGradient>
-                </Animated.View>
+                              </View>
+                            </LinearGradient>
 
                 {/* First Aid Emergencies Section */}
                 <View style={styles.sectionContainer}>
-                    <View style={styles.sectionHeader}>
-                        <MaterialIcons name="medical-services" size={24} color="#BB2B29" />
-                        <Text style={styles.sectionTitle}>First Aid Emergencies</Text>
-                    </View>
+                    
                     
                     <LinearGradient
                         colors={['#BB2B29', '#ffffff', '#BB2B29']}
@@ -247,6 +244,13 @@ const LearnScreen = ({ navigation }) => {
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}>
                         <NoiseOverlay opacity={0.5} />
+
+                        <View style={styles.scoreHeader}>
+                            <View style={styles.mythIconCircle}>
+                                <MaterialIcons name="medical-services" size={24} color="#530404" />
+                            </View>
+                            <Text style={styles.scoreTitle}>First-Aid Emergencies</Text>
+                        </View>
                         
                         <View style={styles.lessonsGrid}>
                             {firstAidLessons.map((lesson, index) => (
@@ -273,7 +277,7 @@ const LearnScreen = ({ navigation }) => {
                                             <View style={[styles.iconContainer, { backgroundColor: lesson.color + '20' }]}>
                                                 <MaterialIcons 
                                                     name={lesson.icon} 
-                                                    size={32} 
+                                                    size={28} 
                                                     color={lesson.color} 
                                                 />
                                                 {lesson.completed && (
@@ -319,10 +323,6 @@ const LearnScreen = ({ navigation }) => {
 
                 {/* Natural Disasters Section */}
                 <View style={styles.sectionContainer}>
-                    <View style={styles.sectionHeader}>
-                        <MaterialIcons name="crisis-alert" size={24} color="#FFA000" />
-                        <Text style={styles.sectionTitle}>Natural Disasters</Text>
-                    </View>
                     
                     <LinearGradient
                         colors={['#FFA000', '#ffffff', '#FFA000']}
@@ -330,6 +330,13 @@ const LearnScreen = ({ navigation }) => {
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}>
                         <NoiseOverlay opacity={0.5} />
+
+                        <View style={styles.scoreHeader}>
+                            <View style={styles.mythIconCircle}>
+                                <MaterialIcons name="crisis-alert" size={24} color="#530404" />
+                            </View>
+                            <Text style={styles.scoreTitle}>Natural Disasters</Text>
+                        </View>
                         
                         <View style={styles.lessonsGrid}>
                             {naturalDisasterLessons.map((lesson, index) => (
@@ -356,7 +363,7 @@ const LearnScreen = ({ navigation }) => {
                                             <View style={[styles.iconContainer, { backgroundColor: lesson.color + '20' }]}>
                                                 <MaterialIcons 
                                                     name={lesson.icon} 
-                                                    size={32} 
+                                                    size={28} 
                                                     color={lesson.color} 
                                                 />
                                                 {lesson.completed && (
@@ -400,36 +407,13 @@ const LearnScreen = ({ navigation }) => {
                     </LinearGradient>
                 </View>
 
-                {/* Special Section */}
-                <View style={styles.specialSection}>
-                    <Text style={styles.sectionTitle}>Essential Skills</Text>
-                    <TouchableOpacity
-                        style={styles.specialCard}
-                        onPress={() => navigation.navigate('FirstAidKit')}
-                        activeOpacity={0.8}>
-                        
-                        <LinearGradient
-                            colors={['#FF6F00', '#ffffff', '#FF6F00']}
-                            style={styles.specialGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}>
-                            <NoiseOverlay opacity={0.5} />
-                            
-                            <MaterialIcons name="medical-services" size={36} color="#FF6F00" />
-                            <View style={styles.specialTextContent}>
-                                <Text style={styles.specialTitle}>First-Aid Kit Preparation</Text>
-                                <Text style={styles.specialSubtitle}>Learn what you need & why</Text>
-                            </View>
-                            <MaterialIcons name="chevron-right" size={28} color="#530404" />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
+                
             </ScrollView>
         </View>
     );
 };
 
-const CARD_WIDTH = (width - 68) / 2;
+const CARD_WIDTH = (width - 60) / 2;
 
 const styles = StyleSheet.create({
     container: {
@@ -460,7 +444,8 @@ const styles = StyleSheet.create({
         fontFamily: "PoppinsRegular",
     },
     progressBox: {
-        marginBottom: 30,
+        marginTop: -20,
+        marginBottom: 35,
         borderRadius: 20,
         overflow: 'hidden',
         elevation: 12,
@@ -471,7 +456,7 @@ const styles = StyleSheet.create({
     },
     progressBoxGradient: {
         borderWidth: 4,
-        borderColor: "#F57C00",
+        borderColor: "#530404",
         borderRadius: 20,
         paddingVertical: 25,
         paddingHorizontal: 10,
@@ -529,7 +514,7 @@ const styles = StyleSheet.create({
         borderWidth: 4,
         borderColor: "#931111ff",
         borderRadius: 20,
-        padding: 15,
+        padding: 10,
         elevation: 10,
     },
     lessonsGrid: {
@@ -538,17 +523,18 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     lessonCard: {
-        width: CARD_WIDTH,
+        width: CARD_WIDTH-15,
         backgroundColor: "#fff",
         borderWidth: 3,
         borderColor: "#530404",
-        borderRadius: 16,
-        marginBottom: 16,
+        borderRadius: 12,
+        marginBottom: 10,
+        marginHorizontal: 5,
         elevation: 8,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
-        shadowRadius: 5,
+        shadowRadius: 3,
         overflow: 'hidden',
     },
     completedCard: {
@@ -556,15 +542,15 @@ const styles = StyleSheet.create({
         backgroundColor: "#F8FFF8",
     },
     cardContent: {
-        padding: 15,
+        padding: 12,
     },
     iconContainer: {
-        width: 56,
-        height: 56,
+        width: 48,
+        height: 48,
         borderRadius: 28,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 10,
+        marginBottom: 8,
         elevation: 3,
         position: 'relative',
     },
@@ -572,9 +558,9 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: 0,
-        width: 20,
-        height: 20,
-        borderRadius: 10,
+        width: 18,
+        height: 18,
+        borderRadius: 9,
         backgroundColor: '#2E7D32',
         alignItems: 'center',
         justifyContent: 'center',
@@ -582,17 +568,17 @@ const styles = StyleSheet.create({
         borderColor: '#fff',
     },
     lessonTitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: "#333",
         fontFamily: "PoppinsBold",
-        marginBottom: 3,
+        marginBottom: 2,
     },
     lessonSubtitle: {
-        fontSize: 12,
+        fontSize: 11,
         color: "#666",
         fontFamily: "PoppinsRegular",
-        marginBottom: 10,
-        minHeight: 32,
+        marginBottom: 8,
+        minHeight: 28,
     },
     lessonMeta: {
         flexDirection: 'row',
@@ -605,10 +591,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     lessonMetaText: {
-        fontSize: 11,
+        fontSize: 10,
         color: "#666",
         fontFamily: "PoppinsRegular",
-        marginLeft: 3,
+        marginLeft: 2,
     },
     difficultyDot: {
         width: 8,
@@ -616,7 +602,7 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     miniProgressBar: {
-        height: 4,
+        height: 3,
         backgroundColor: '#FFE5E5',
         borderRadius: 2,
         overflow: 'hidden',
@@ -657,6 +643,47 @@ const styles = StyleSheet.create({
         fontFamily: 'PoppinsRegular',
         marginTop: 2,
     },
+    mythIconCircle: {
+     width: 36,
+     height: 36,
+     borderRadius: 18,
+     backgroundColor: '#fff',
+     borderWidth: 2,
+     borderColor: '#530404',
+     alignItems: 'center',
+     justifyContent: 'center',
+     marginRight: 10,
+    },
+    scoreTitle: {
+     fontSize: 22,
+     color: "#4b4949ff",
+     fontFamily: "PoppinsMedium",
+     paddingLeft: -50,
+    },
+    scoreHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+        marginLeft: 5,
+    },
+    scoreSection: {
+     backgroundColor: "rgba(255,236,238,0.95)",
+     borderWidth: 4,
+     borderColor: "#931111ff",
+     borderRadius: 18,
+     padding: 12,
+     marginTop: -20,
+     marginBottom: 25,
+     elevation: 10,
+    },
+    progressContainer: {
+     backgroundColor: '#fff',
+     borderWidth: 2,
+     borderColor: '#530404',
+     borderRadius: 12,
+     padding: 20,
+     elevation: 5,
+ },
 });
 
 export default LearnScreen;
