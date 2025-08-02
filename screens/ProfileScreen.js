@@ -91,8 +91,8 @@ const ProfileScreen = ({ navigation }) => {
                 }).start();
             }
             
-            // Expand new section
-            const heightValue = section === 'medical' ? 200 : 150;
+            // Expand new section - smaller heights to fit in box
+            const heightValue = section === 'medical' ? 120 : section === 'emergency' ? 100 : 80;
             Animated.timing(animatedHeights[section], {
                 toValue: heightValue,
                 duration: 300,
@@ -110,13 +110,13 @@ const ProfileScreen = ({ navigation }) => {
                 activeOpacity={0.8}>
                 <View style={styles.infoBoxTitle}>
                     <View style={[styles.iconCircle, { backgroundColor: color + '20' }]}>
-                        <MaterialIcons name={icon} size={24} color={color} />
+                        <MaterialIcons name={icon} size={20} color={color} />
                     </View>
                     <Text style={styles.infoBoxTitleText}>{title}</Text>
                 </View>
                 <MaterialIcons 
                     name={expandedSection === section ? "expand-less" : "expand-more"} 
-                    size={24} 
+                    size={20} 
                     color={color} 
                 />
             </TouchableOpacity>
@@ -127,7 +127,7 @@ const ProfileScreen = ({ navigation }) => {
                     { 
                         maxHeight: animatedHeights[section],
                         opacity: animatedHeights[section].interpolate({
-                            inputRange: [0, 150],
+                            inputRange: [0, 80],
                             outputRange: [0, 1]
                         })
                     }
@@ -157,220 +157,181 @@ const ProfileScreen = ({ navigation }) => {
                 {/* Profile Header */}
                 <LinearGradient
                     colors={['#BB2B29', '#ffffff', '#BB2B29']}
-                    style={styles.profileHeader}
+                    style={styles.mythSection}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}>
-                    <NoiseOverlay opacity={0.8} />
-                    
-                    {/* Profile Image */}
-                    <TouchableOpacity 
-                        style={styles.profileImageContainer}
-                        onPress={() => setShowImagePicker(true)}>
-                        {userProfile.profileImage ? (
-                            <Image source={{ uri: userProfile.profileImage }} style={styles.profileImage} />
-                        ) : (
-                            <View style={styles.profileImagePlaceholder}>
-                                <MaterialIcons name="person" size={50} color="#fff" />
-                            </View>
-                        )}
-                        <View style={styles.editImageBadge}>
-                            <MaterialIcons name="camera-alt" size={16} color="#fff" />
+
+                    <NoiseOverlay opacity={1.0} />
+
+                    <View style={styles.mythHeader}>
+                        <View style={styles.mythIconCircle}>
+                            <MaterialIcons name="person" size={24} color="#530404" />
                         </View>
-                    </TouchableOpacity>
-                    
-                    <Text style={styles.userName}>{userProfile.name}</Text>
-                    <Text style={styles.userEmail}>{userProfile.email}</Text>
-                    
-                    {/* Quick Stats */}
-                    <View style={styles.quickStats}>
-                        <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>{stats.lessonsCompleted}</Text>
-                            <Text style={styles.statLabel}>Lessons</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>{stats.totalPoints}</Text>
-                            <Text style={styles.statLabel}>Points</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>#{stats.leaderboardRank}</Text>
-                            <Text style={styles.statLabel}>Rank</Text>
-                        </View>
+                        <Text style={styles.mythTitle}>User Profile</Text>
                     </View>
-                </LinearGradient>
 
-                {/* Badges Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Achievements</Text>
-                    <View style={styles.badgesContainer}>
-                        {userProfile.badges.map((badge) => (
-                            <TouchableOpacity
-                                key={badge.id}
-                                style={[
-                                    styles.badgeItem,
-                                    !badge.earned && styles.unearned
-                                ]}
-                                activeOpacity={0.8}>
-                                <View style={[
-                                    styles.badgeIcon,
-                                    { backgroundColor: badge.earned ? badge.color : '#ccc' }
-                                ]}>
-                                    <MaterialIcons 
-                                        name={badge.icon} 
-                                        size={28} 
-                                        color="#fff" 
-                                    />
-                                </View>
-                                <Text style={[
-                                    styles.badgeName,
-                                    !badge.earned && styles.unearnedText
-                                ]}>
-                                    {badge.name}
-                                </Text>
-                                {!badge.earned && (
-                                    <MaterialIcons name="lock" size={16} color="#ccc" />
-                                )}
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
-
-                {/* Medical Information */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Medical Information</Text>
-                    
-                    {/* Allergies */}
-                    <InfoBox 
-                        title="Allergies & Reactions" 
-                        icon="warning" 
-                        color="#BB2B29" 
-                        section="allergies">
-                        <View style={styles.infoList}>
-                            {userProfile.allergies.map((allergy, index) => (
-                                <View key={index} style={styles.infoItem}>
-                                    <MaterialIcons name="error-outline" size={16} color="#BB2B29" />
-                                    <Text style={styles.infoItemText}>{allergy}</Text>
-                                </View>
-                            ))}
-                            <TouchableOpacity style={styles.addButton}>
-                                <MaterialIcons name="add" size={20} color="#BB2B29" />
-                                <Text style={styles.addButtonText}>Add Allergy</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </InfoBox>
-
-                    {/* Emergency Contacts */}
-                    <InfoBox 
-                        title="Emergency Contacts" 
-                        icon="phone" 
-                        color="#2E7D32" 
-                        section="emergency">
-                        <View style={styles.contactsList}>
-                            {userProfile.emergencyContacts.map((contact, index) => (
-                                <View key={index} style={styles.contactItem}>
-                                    <View>
-                                        <Text style={styles.contactName}>{contact.name}</Text>
-                                        <Text style={styles.contactRelation}>{contact.relation}</Text>
+                    <ScrollView 
+                        style={styles.mythContent}
+                        contentContainerStyle={styles.mythContentInner}
+                        showsVerticalScrollIndicator={false}
+                        nestedScrollEnabled={true}
+                    >
+                        <NoiseOverlay opacity={1.0} />
+                        
+                        {/* Profile Image and Basic Info */}
+                        <View style={styles.profileSection}>
+                            <TouchableOpacity 
+                                style={styles.profileImageContainer}
+                                onPress={() => setShowImagePicker(true)}>
+                                {userProfile.profileImage ? (
+                                    <Image source={{ uri: userProfile.profileImage }} style={styles.profileImage} />
+                                ) : (
+                                    <View style={styles.profileImagePlaceholder}>
+                                        <MaterialIcons name="person" size={40} color="#fff" />
                                     </View>
-                                    <Text style={styles.contactPhone}>{contact.phone}</Text>
+                                )}
+                                <View style={styles.editImageBadge}>
+                                    <MaterialIcons name="camera-alt" size={12} color="#fff" />
                                 </View>
-                            ))}
-                            <TouchableOpacity style={styles.addButton}>
-                                <MaterialIcons name="person-add" size={20} color="#2E7D32" />
-                                <Text style={styles.addButtonText}>Add Contact</Text>
                             </TouchableOpacity>
-                        </View>
-                    </InfoBox>
 
-                    {/* Medical Records */}
-                    <InfoBox 
-                        title="Medical Records" 
-                        icon="folder" 
-                        color="#FFA000" 
-                        section="medical">
-                        <View style={styles.medicalContent}>
-                            <View style={styles.medicalSection}>
-                                <Text style={styles.medicalLabel}>Blood Type:</Text>
-                                <Text style={styles.medicalValue}>{userProfile.bloodType}</Text>
+                            <View style={styles.userInfo}>
+                                <Text style={styles.userName}>{userProfile.name}</Text>
+                                <Text style={styles.userEmail}>{userProfile.email}</Text>
+                                <Text style={styles.userPhone}>{userProfile.phone}</Text>
                             </View>
-                            <View style={styles.medicalSection}>
-                                <Text style={styles.medicalLabel}>Conditions:</Text>
-                                {userProfile.medicalConditions.map((condition, index) => (
-                                    <Text key={index} style={styles.medicalItem}>• {condition}</Text>
+                        </View>
+
+                        {/* Quick Stats */}
+                        <View style={styles.quickStats}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statNumber}>{stats.totalPoints}</Text>
+                                <Text style={styles.statLabel}>Points</Text>
+                            </View>
+                            <View style={styles.statDivider} />
+                            <View style={styles.statItem}>
+                                <Text style={styles.statNumber}>{stats.lessonsCompleted}</Text>
+                                <Text style={styles.statLabel}>Lessons</Text>
+                            </View>
+                            <View style={styles.statDivider} />
+                            <View style={styles.statItem}>
+                                <Text style={styles.statNumber}>#{stats.leaderboardRank}</Text>
+                                <Text style={styles.statLabel}>Rank</Text>
+                            </View>
+                        </View>
+
+                        {/* Badges Section */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Achievements</Text>
+                            <View style={styles.badgesContainer}>
+                                {userProfile.badges.slice(0, 3).map((badge) => (
+                                    <View key={badge.id} style={[styles.badgeItem, !badge.earned && styles.unearned]}>
+                                        <View style={[styles.badgeIcon, { backgroundColor: badge.color + '20' }]}>
+                                            <MaterialIcons name={badge.icon} size={20} color={badge.color} />
+                                        </View>
+                                        <Text style={[styles.badgeName, !badge.earned && styles.unearnedText]}>
+                                            {badge.name}
+                                        </Text>
+                                    </View>
                                 ))}
                             </View>
-                            <View style={styles.medicalSection}>
-                                <Text style={styles.medicalLabel}>Current Medications:</Text>
-                                {userProfile.medications.map((med, index) => (
-                                    <Text key={index} style={styles.medicalItem}>• {med}</Text>
-                                ))}
-                            </View>
-                            <TouchableOpacity style={styles.viewAllButton}>
-                                <Text style={styles.viewAllText}>View Full Medical History</Text>
-                                <MaterialIcons name="arrow-forward" size={16} color="#FFA000" />
+                        </View>
+
+                        {/* Medical Information Sections */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Medical Information</Text>
+
+                            {/* Allergies */}
+                            <InfoBox 
+                                title="Allergies" 
+                                icon="warning" 
+                                color="#FF5722" 
+                                section="allergies">
+                                <View style={styles.infoList}>
+                                    {userProfile.allergies.map((allergy, index) => (
+                                        <View key={index} style={styles.infoItem}>
+                                            <MaterialIcons name="fiber-manual-record" size={8} color="#FF5722" />
+                                            <Text style={styles.infoItemText}>{allergy}</Text>
+                                        </View>
+                                    ))}
+                                    <TouchableOpacity style={styles.addButton}>
+                                        <MaterialIcons name="add" size={16} color="#FF5722" />
+                                        <Text style={[styles.addButtonText, { color: "#FF5722" }]}>Add Allergy</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </InfoBox>
+
+                            {/* Emergency Contacts */}
+                            <InfoBox 
+                                title="Emergency Contacts" 
+                                icon="contact-phone" 
+                                color="#2E7D32" 
+                                section="emergency">
+                                <View style={styles.contactsList}>
+                                    {userProfile.emergencyContacts.map((contact, index) => (
+                                        <View key={index} style={styles.contactItem}>
+                                            <View>
+                                                <Text style={styles.contactName}>{contact.name}</Text>
+                                                <Text style={styles.contactRelation}>{contact.relation}</Text>
+                                            </View>
+                                            <Text style={styles.contactPhone}>{contact.phone}</Text>
+                                        </View>
+                                    ))}
+                                    <TouchableOpacity style={styles.addButton}>
+                                        <MaterialIcons name="add" size={16} color="#2E7D32" />
+                                        <Text style={[styles.addButtonText, { color: "#2E7D32" }]}>Add Contact</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </InfoBox>
+
+                            {/* Medical Conditions & Medications */}
+                            <InfoBox 
+                                title="Medical History" 
+                                icon="medical-services" 
+                                color="#1976D2" 
+                                section="medical">
+                                <View style={styles.medicalContent}>
+                                    <View style={styles.medicalCompact}>
+                                        <Text style={styles.medicalLabel}>Blood Type: <Text style={styles.medicalValue}>{userProfile.bloodType}</Text></Text>
+                                    </View>
+                                    
+                                    <View style={styles.medicalCompact}>
+                                        <Text style={styles.medicalLabel}>Conditions:</Text>
+                                        <Text style={styles.medicalItem}>{userProfile.medicalConditions.join(', ')}</Text>
+                                    </View>
+                                    
+                                    <View style={styles.medicalCompact}>
+                                        <Text style={styles.medicalLabel}>Medications:</Text>
+                                        <Text style={styles.medicalItem}>{userProfile.medications.length} prescribed</Text>
+                                    </View>
+                                </View>
+                            </InfoBox>
+                        </View>
+
+                        {/* Next Steps Section */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Continue Your Journey</Text>
+                            
+                            <TouchableOpacity style={styles.nextStepsCard}>
+                                <View style={styles.nextStepsHeader}>
+                                    <MaterialIcons name="volunteer-activism" size={20} color="#BB2B29" />
+                                    <Text style={styles.nextStepsTitle}>Local First Aid Opportunities</Text>
+                                </View>
+                                <Text style={styles.nextStepsText}>Find Red Cross volunteering and certification courses near you</Text>
+                                <View style={styles.nextStepsButton}>
+                                    <Text style={styles.nextStepsButtonText}>Find Events</Text>
+                                    <MaterialIcons name="location-on" size={14} color="#fff" />
+                                </View>
                             </TouchableOpacity>
                         </View>
-                    </InfoBox>
-                </View>
-
-                {/* Activity Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Community Activity</Text>
-                    
-                    <TouchableOpacity style={styles.activityCard}>
-                        <LinearGradient
-                            colors={['#7B1FA2', '#ffffff', '#7B1FA2']}
-                            style={styles.activityGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}>
-                            <NoiseOverlay opacity={0.5} />
-                            <MaterialIcons name="forum" size={32} color="#7B1FA2" />
-                            <View style={styles.activityContent}>
-                                <Text style={styles.activityTitle}>Forum Contributions</Text>
-                                <Text style={styles.activityStats}>{stats.commentsPosted} posts • {stats.helpfulVotes} helpful votes</Text>
-                            </View>
-                            <MaterialIcons name="chevron-right" size={24} color="#530404" />
-                        </LinearGradient>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.activityCard}>
-                        <LinearGradient
-                            colors={['#0277BD', '#ffffff', '#0277BD']}
-                            style={styles.activityGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}>
-                            <NoiseOverlay opacity={0.5} />
-                            <MaterialIcons name="leaderboard" size={32} color="#0277BD" />
-                            <View style={styles.activityContent}>
-                                <Text style={styles.activityTitle}>Leaderboard</Text>
-                                <Text style={styles.activityStats}>Rank #{stats.leaderboardRank} • Top 10%</Text>
-                            </View>
-                            <MaterialIcons name="chevron-right" size={24} color="#530404" />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Next Steps Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Continue Your Journey</Text>
-                    
-                    <TouchableOpacity style={styles.nextStepsCard}>
-                        <View style={styles.nextStepsHeader}>
-                            <MaterialIcons name="volunteer-activism" size={24} color="#BB2B29" />
-                            <Text style={styles.nextStepsTitle}>Local First Aid Opportunities</Text>
-                        </View>
-                        <Text style={styles.nextStepsText}>Find Red Cross volunteering and certification courses near you</Text>
-                        <View style={styles.nextStepsButton}>
-                            <Text style={styles.nextStepsButtonText}>Find Events</Text>
-                            <MaterialIcons name="location-on" size={16} color="#fff" />
-                        </View>
-                    </TouchableOpacity>
-                </View>
+                    </ScrollView>
+                </LinearGradient>
             </ScrollView>
         </View>
     );
 };
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -384,335 +345,334 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         paddingBottom: 100,
     },
-    profileHeader: {
-        borderRadius: 20,
-        marginHorizontal: 20,
-        marginBottom: 20,
-        padding: 20,
-        alignItems: 'center',
+    mythSection: {
+        backgroundColor: "rgba(255,236,238,0.95)",
         borderWidth: 4,
         borderColor: "#931111ff",
+        borderRadius: 18,
+        padding: 12,
+        marginHorizontal: 20,
+        marginTop: 20, 
         elevation: 10,
+    },
+    mythHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    mythIconCircle: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: '#530404',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    mythTitle: {
+        fontSize: 22,
+        color: "#4b4949ff",
+        fontFamily: "PoppinsMedium",
+    },
+    mythContent: {
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: '#530404',
+        borderRadius: 12,
+        height: 450, // Fixed height to prevent overflow
+        paddingHorizontal: 15,
+    },
+    mythContentInner: {
+        paddingVertical: 15,
+    },
+    profileSection: {
+        alignItems: 'center',
+        marginBottom: 20,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
     },
     profileImageContainer: {
         position: 'relative',
-        marginBottom: 15,
+        marginBottom: 10,
     },
     profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        borderWidth: 4,
-        borderColor: '#fff',
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        borderWidth: 3,
+        borderColor: '#BB2B29',
     },
     profileImagePlaceholder: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         backgroundColor: '#530404',
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 4,
-        borderColor: '#fff',
+        borderWidth: 3,
+        borderColor: '#BB2B29',
     },
     editImageBadge: {
         position: 'absolute',
         bottom: 0,
         right: 0,
         backgroundColor: '#FFC107',
-        borderRadius: 15,
-        width: 30,
-        height: 30,
+        borderRadius: 12,
+        width: 24,
+        height: 24,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
         borderColor: '#fff',
     },
+    userInfo: {
+        alignItems: 'center',
+    },
     userName: {
-        fontSize: 24,
+        fontSize: 18,
         color: '#4b4949ff',
-        fontFamily: 'PoppinsBold',
-        marginBottom: 5,
+        fontWeight: 'bold',
+        marginBottom: 3,
     },
     userEmail: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#666',
-        fontFamily: 'PoppinsRegular',
-        marginBottom: 20,
+        marginBottom: 2,
+    },
+    userPhone: {
+        fontSize: 12,
+        color: '#666',
     },
     quickStats: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        borderRadius: 15,
-        padding: 15,
-        borderWidth: 2,
-        borderColor: '#530404',
+        backgroundColor: 'rgba(255,245,245,0.8)',
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#FFE5E5',
     },
     statItem: {
         flex: 1,
         alignItems: 'center',
     },
     statNumber: {
-        fontSize: 20,
+        fontSize: 16,
         color: '#BB2B29',
-        fontFamily: 'PoppinsBold',
+        fontWeight: 'bold',
     },
     statLabel: {
-        fontSize: 12,
+        fontSize: 10,
         color: '#666',
-        fontFamily: 'PoppinsRegular',
     },
     statDivider: {
         width: 1,
-        height: 40,
+        height: 30,
         backgroundColor: '#DDD',
     },
     section: {
-        marginHorizontal: 20,
-        marginBottom: 20,
+        marginBottom: 15,
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: 16,
         color: '#4b4949ff',
-        fontFamily: 'PoppinsMedium',
-        marginBottom: 15,
+        fontWeight: '600',
+        marginBottom: 10,
     },
     badgesContainer: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginHorizontal: -5,
+        justifyContent: 'space-between',
+        marginBottom: 10,
     },
     badgeItem: {
         alignItems: 'center',
-        margin: 5,
-        padding: 10,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        borderWidth: 2,
+        padding: 8,
+        backgroundColor: '#fafafa',
+        borderRadius: 8,
+        borderWidth: 1,
         borderColor: '#f0f0f0',
-        width: (width - 60) / 3,
-        elevation: 3,
+        flex: 1,
+        marginHorizontal: 2,
     },
     unearned: {
         opacity: 0.5,
     },
     badgeIcon: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 5,
+        marginBottom: 4,
     },
     badgeName: {
-        fontSize: 12,
+        fontSize: 10,
         color: '#333',
-        fontFamily: 'PoppinsMedium',
+        fontWeight: '500',
         textAlign: 'center',
     },
     unearnedText: {
         color: '#999',
     },
     infoBoxContainer: {
-        marginBottom: 10,
-        backgroundColor: '#fff',
-        borderRadius: 12,
+        marginBottom: 8,
+        backgroundColor: '#fafafa',
+        borderRadius: 8,
         overflow: 'hidden',
-        elevation: 5,
     },
     infoBoxHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 15,
-        borderWidth: 2,
-        borderRadius: 12,
+        padding: 10,
+        borderWidth: 1,
+        borderRadius: 8,
+        backgroundColor: '#fff',
     },
     infoBoxTitle: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     iconCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 12,
+        marginRight: 8,
     },
     infoBoxTitleText: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#333',
-        fontFamily: 'PoppinsMedium',
+        fontWeight: '500',
     },
     infoBoxContent: {
         overflow: 'hidden',
+        backgroundColor: '#fff',
     },
     infoBoxInner: {
-        padding: 15,
+        padding: 10,
         paddingTop: 0,
     },
     infoList: {
-        paddingTop: 10,
+        paddingTop: 8,
     },
     infoItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     infoItemText: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#333',
-        fontFamily: 'PoppinsRegular',
-        marginLeft: 8,
+        marginLeft: 6,
     },
     addButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10,
-        backgroundColor: '#FFE5E5',
-        borderRadius: 8,
-        marginTop: 10,
+        padding: 8,
+        backgroundColor: '#f8f8f8',
+        borderRadius: 6,
+        marginTop: 8,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        borderStyle: 'dashed',
     },
     addButtonText: {
-        fontSize: 14,
-        color: '#BB2B29',
-        fontFamily: 'PoppinsMedium',
-        marginLeft: 5,
+        fontSize: 12,
+        fontWeight: '500',
+        marginLeft: 4,
     },
     contactsList: {
-        paddingTop: 10,
+        paddingTop: 8,
     },
     contactItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 8,
+        paddingVertical: 6,
         borderBottomWidth: 1,
         borderBottomColor: '#f0f0f0',
     },
     contactName: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#333',
-        fontFamily: 'PoppinsMedium',
+        fontWeight: '500',
     },
     contactRelation: {
-        fontSize: 12,
+        fontSize: 10,
         color: '#666',
-        fontFamily: 'PoppinsRegular',
     },
     contactPhone: {
-        fontSize: 13,
+        fontSize: 11,
         color: '#2E7D32',
-        fontFamily: 'PoppinsRegular',
     },
     medicalContent: {
-        paddingTop: 10,
+        paddingTop: 8,
+    },
+    medicalCompact: {
+        marginBottom: 6,
     },
     medicalSection: {
-        marginBottom: 15,
+        marginBottom: 10,
     },
     medicalLabel: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#666',
-        fontFamily: 'PoppinsMedium',
-        marginBottom: 5,
-    },
-    medicalValue: {
-        fontSize: 16,
-        color: '#333',
-        fontFamily: 'PoppinsBold',
-    },
-    medicalItem: {
-        fontSize: 14,
-        color: '#333',
-        fontFamily: 'PoppinsRegular',
-        marginLeft: 10,
+        fontWeight: '500',
         marginBottom: 3,
     },
-    viewAllButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 10,
-        backgroundColor: '#FFF3E0',
-        borderRadius: 8,
-        marginTop: 10,
-    },
-    viewAllText: {
+    medicalValue: {
         fontSize: 14,
-        color: '#FFA000',
-        fontFamily: 'PoppinsMedium',
-        marginRight: 5,
-    },
-    activityCard: {
-        marginBottom: 10,
-        borderRadius: 12,
-        overflow: 'hidden',
-        elevation: 5,
-    },
-    activityGradient: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-        borderWidth: 3,
-        borderColor: '#530404',
-        borderRadius: 12,
-    },
-    activityContent: {
-        flex: 1,
-        marginLeft: 15,
-    },
-    activityTitle: {
-        fontSize: 16,
         color: '#333',
-        fontFamily: 'PoppinsMedium',
+        fontWeight: 'bold',
     },
-    activityStats: {
-        fontSize: 13,
-        color: '#666',
-        fontFamily: 'PoppinsRegular',
+    medicalItem: {
+        fontSize: 11,
+        color: '#333',
+        marginTop: 2,
+        fontStyle: 'italic',
     },
     nextStepsCard: {
         backgroundColor: '#fff',
-        borderWidth: 3,
+        borderWidth: 2,
         borderColor: '#BB2B29',
-        borderRadius: 12,
-        padding: 15,
-        elevation: 5,
+        borderRadius: 8,
+        padding: 12,
     },
     nextStepsHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 8,
     },
     nextStepsTitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#333',
-        fontFamily: 'PoppinsMedium',
-        marginLeft: 10,
+        fontWeight: '500',
+        marginLeft: 8,
     },
     nextStepsText: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#666',
-        fontFamily: 'PoppinsRegular',
-        marginBottom: 15,
+        marginBottom: 10,
+        lineHeight: 16,
     },
     nextStepsButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#BB2B29',
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: 6,
+        padding: 8,
     },
     nextStepsButtonText: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#fff',
-        fontFamily: 'PoppinsBold',
-        marginRight: 5,
+        fontWeight: 'bold',
+        marginRight: 4,
     },
 });
-
-export default ProfileScreen;

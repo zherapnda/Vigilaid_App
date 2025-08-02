@@ -130,7 +130,7 @@ const HomeScreen = () => {
                         </View>
     
     
-                     {!showTruth && (
+                      {!showTruth && (
                         <TouchableOpacity 
                             style={styles.revealButton}
                             onPress={() => {
@@ -142,17 +142,17 @@ const HomeScreen = () => {
                            <Text style={styles.revealButtonText}>TAP TO REVEAL THE TRUTH</Text>
                            <MaterialIcons name="visibility" size={20} color="#fff" />
                         </TouchableOpacity>
-                     )}
+                      )}
     
     
-                     {showTruth && (
+                      {showTruth && (
                         <View style={styles.truthRevealBlock}>
                             <NoiseOverlay opacity={0.8} />
                             <MaterialIcons name="verified" size={24} color="#2E7D32" />
                             <Text style={styles.truthBigLabel}>THE TRUTH:</Text>
                             <Text style={styles.truthText}>{mythOfTheDay.truth}</Text>
                         </View>
-                     )}
+                      )}
                     </View>
                 </LinearGradient>
 
