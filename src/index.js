@@ -1,26 +1,31 @@
 // Import all lessons
-import { chokingReliefLesson } from './lessons/chokingRelief';
+import { Choking } from './lessons/Choking.js';
 
 // Import other lessons as you create them...
 
 // Import all quizzes
-import { chokingReliefQuiz } from './quizzes/chokingRelief';
+import { chokingReliefQuiz } from './quizzes/Choking.js';
 
 // Import other quizzes...
 
 export const lessons = {
-  'choking-relief': chokingReliefLesson,
+  'Choking Relief': Choking,
+  'Choking': Choking,
   // Add more as you create them
 };
 
 export const quizzes = {
-  'choking-relief': chokingReliefQuiz,
+  'Choking': chokingReliefQuiz,
 
   // Add more as you create them
 };
 
 export const getLessonContent = (lessonId) => {
-  return lessons[lessonId] || null;
+  console.log('getLessonContent called with:', lessonId);
+  console.log('Available lessons:', Object.keys(lessons));
+  const result = lessons[lessonId] || null;
+  console.log('Returning:', result);
+  return result;
 };
 
 export const getQuizQuestions = (lessonId) => {

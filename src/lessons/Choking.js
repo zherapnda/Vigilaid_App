@@ -1,5 +1,5 @@
-export const chokingReliefLesson = {
-  id: 'choking-relief',
+export const Choking = {
+  id: 'Choking',
   title: 'Choking Relief',
   icon: 'air',
   color: '#2E7D32',

@@ -1,29 +1,31 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-    View, 
-    Text, 
-    StyleSheet, 
-    ScrollView, 
-    TouchableOpacity, 
-    Dimensions,
-    Animated,
-    StatusBar
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import NoiseOverlay from '@/components/noiseBackground';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import NoiseOverlay from '@/components/noiseBackground';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    Dimensions,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const LearnScreen = ({ navigation }) => {
+const LearnScreen = () => {
+    const router = useRouter();
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const [firstAidLessons] = useState([
         {
-            id: 'choking-relief',
+            id: 'Choking',
             title: "Choking Relief",
-            subtitle: "Save a life in seconds",
+            subtitle: "Help",
             icon: "air",
             duration: "15 min",
             modules: 3,
@@ -175,7 +177,11 @@ const LearnScreen = ({ navigation }) => {
 
     const handleLessonPress = (lesson) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        navigation.navigate('Lesson', { lessonId: lesson.id, lessonInfo: lesson });
+        console.log('Navigating to lesson:', lesson);
+        router.push({
+            pathname: '/lesson',
+            params: { lessonId: lesson.id, lessonInfo: JSON.stringify(lesson) }
+        });
     };
 
     return (
@@ -237,13 +243,6 @@ const LearnScreen = ({ navigation }) => {
                 {/* First Aid Emergencies Section */}
                 <View style={styles.sectionContainer}>
                     
-                    
-                    <LinearGradient
-                        colors={['#BB2B29', '#ffffff', '#BB2B29']}
-                        style={styles.lessonsContainer}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}>
-                        <NoiseOverlay opacity={0.5} />
 
                         <View style={styles.scoreHeader}>
                             <View style={styles.mythIconCircle}>
@@ -274,22 +273,25 @@ const LearnScreen = ({ navigation }) => {
                                         activeOpacity={0.8}>
                                         
                                         <View style={styles.cardContent}>
-                                            <View style={[styles.iconContainer, { backgroundColor: lesson.color + '20' }]}>
+                                            <View style={[styles.iconContainer, { backgroundColor: lesson.color + '10' }]}>
                                                 <MaterialIcons 
                                                     name={lesson.icon} 
                                                     size={28} 
                                                     color={lesson.color} 
                                                 />
+                                                
                                                 {lesson.completed && (
                                                     <View style={styles.checkBadge}>
                                                         <MaterialIcons name="check" size={12} color="#fff" />
                                                     </View>
                                                 )}
+
+                                                
                                             </View>
-                                            
                                             <Text style={styles.lessonTitle} numberOfLines={1}>
                                                 {lesson.title}
                                             </Text>
+                                    
                                             <Text style={styles.lessonSubtitle} numberOfLines={2}>
                                                 {lesson.subtitle}
                                             </Text>
@@ -318,19 +320,13 @@ const LearnScreen = ({ navigation }) => {
                                 </Animated.View>
                             ))}
                         </View>
-                    </LinearGradient>
+                    
                 </View>
 
                 {/* Natural Disasters Section */}
                 <View style={styles.sectionContainer}>
                     
-                    <LinearGradient
-                        colors={['#FFA000', '#ffffff', '#FFA000']}
-                        style={styles.lessonsContainer}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}>
-                        <NoiseOverlay opacity={0.5} />
-
+                    
                         <View style={styles.scoreHeader}>
                             <View style={styles.mythIconCircle}>
                                 <MaterialIcons name="crisis-alert" size={24} color="#530404" />
@@ -363,7 +359,7 @@ const LearnScreen = ({ navigation }) => {
                                             <View style={[styles.iconContainer, { backgroundColor: lesson.color + '20' }]}>
                                                 <MaterialIcons 
                                                     name={lesson.icon} 
-                                                    size={28} 
+                                                    size={15} 
                                                     color={lesson.color} 
                                                 />
                                                 {lesson.completed && (
@@ -404,7 +400,7 @@ const LearnScreen = ({ navigation }) => {
                                 </Animated.View>
                             ))}
                         </View>
-                    </LinearGradient>
+                    
                 </View>
 
                 
@@ -523,7 +519,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     lessonCard: {
-        width: CARD_WIDTH-15,
+        width: CARD_WIDTH-2.5,
         backgroundColor: "#fff",
         borderWidth: 3,
         borderColor: "#530404",
@@ -542,16 +538,17 @@ const styles = StyleSheet.create({
         backgroundColor: "#F8FFF8",
     },
     cardContent: {
-        padding: 12,
+        padding: 10,
     },
     iconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 28,
+        width: 40,
+        height: 40,
+        borderRadius: 50,
+        borderColor: '#530404',
+        borderWidth: 1.2,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 8,
-        elevation: 3,
         position: 'relative',
     },
     checkBadge: {

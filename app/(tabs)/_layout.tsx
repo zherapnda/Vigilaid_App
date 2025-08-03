@@ -10,6 +10,7 @@ import ForumScreen from '../../screens/ForumScreen';
 import HomeScreen from '../../screens/HomeScreen';
 import LearnScreen from '../../screens/LearnScreen';
 import ProfileScreen from '../../screens/ProfileScreen';
+import LessonScreen from '../../screens/LessonScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -118,6 +119,7 @@ const App = () => {
             component={ProfileScreen as React.FC}
             options={{ tabBarLabel: 'Profile' }}
           />
+          
         </Tab.Navigator>
     </>
   );

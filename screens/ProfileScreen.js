@@ -307,10 +307,11 @@ const ProfileScreen = ({ navigation }) => {
                                 </View>
                             </InfoBox>
                         </View>
+                        
+                    </ScrollView>
 
-                        {/* Next Steps Section */}
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Continue Your Journey</Text>
+                    <View style={styles.section}>
+                            <Text style={styles.sectionTitle}></Text>
                             
                             <TouchableOpacity style={styles.nextStepsCard}>
                                 <View style={styles.nextStepsHeader}>
@@ -324,7 +325,7 @@ const ProfileScreen = ({ navigation }) => {
                                 </View>
                             </TouchableOpacity>
                         </View>
-                    </ScrollView>
+
                 </LinearGradient>
             </ScrollView>
         </View>
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingTop: 50,
+        paddingTop: 10,
         paddingBottom: 100,
     },
     mythSection: {
@@ -434,17 +435,19 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 18,
         color: '#4b4949ff',
-        fontWeight: 'bold',
         marginBottom: 3,
+        fontFamily: "PoppinsBlack"
     },
     userEmail: {
         fontSize: 12,
         color: '#666',
         marginBottom: 2,
+        fontFamily: "PoppinsBold"
     },
     userPhone: {
         fontSize: 12,
         color: '#666',
+        fontFamily: "PoppinsRegular"
     },
     quickStats: {
         flexDirection: 'row',
@@ -452,8 +455,9 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 12,
         marginBottom: 15,
-        borderWidth: 1,
-        borderColor: '#FFE5E5',
+        borderWidth: 1.5,
+        borderColor: '#530404',
+        fontFamily: "PoppinsRegular"
     },
     statItem: {
         flex: 1,
@@ -463,10 +467,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#BB2B29',
         fontWeight: 'bold',
+        fontFamily: "PoppinBold"
     },
     statLabel: {
         fontSize: 10,
-        color: '#666',
+        color: '#530404',
+        fontFamily: "PoppinsMedium"
     },
     statDivider: {
         width: 1,
@@ -475,12 +481,16 @@ const styles = StyleSheet.create({
     },
     section: {
         marginBottom: 15,
+        marginTop: 14,
+        
     },
     sectionTitle: {
         fontSize: 16,
-        color: '#4b4949ff',
+        color: '#530404',
         fontWeight: '600',
         marginBottom: 10,
+        marginLeft: 3,
+        fontFamily: "PoppinsBold"
     },
     badgesContainer: {
         flexDirection: 'row',
@@ -492,8 +502,8 @@ const styles = StyleSheet.create({
         padding: 8,
         backgroundColor: '#fafafa',
         borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
+        borderWidth: 1.5,
+        borderColor: '#530404',
         flex: 1,
         marginHorizontal: 2,
     },
@@ -513,6 +523,7 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
         textAlign: 'center',
+        fontFamily: "PoppinsRegular"
     },
     unearnedText: {
         color: '#999',
@@ -548,6 +559,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#333',
         fontWeight: '500',
+        fontFamily: "PoppinsMedium"
     },
     infoBoxContent: {
         overflow: 'hidden',
@@ -639,10 +651,11 @@ const styles = StyleSheet.create({
     },
     nextStepsCard: {
         backgroundColor: '#fff',
-        borderWidth: 2,
-        borderColor: '#BB2B29',
+        borderWidth: 3,
+        borderColor: '#530404',
         borderRadius: 8,
         padding: 12,
+        marginTop: -12,
     },
     nextStepsHeader: {
         flexDirection: 'row',
@@ -652,27 +665,31 @@ const styles = StyleSheet.create({
     nextStepsTitle: {
         fontSize: 14,
         color: '#333',
-        fontWeight: '500',
         marginLeft: 8,
+        fontFamily: "PoppinsMedium",
+        marginTop: 4
     },
     nextStepsText: {
         fontSize: 12,
         color: '#666',
         marginBottom: 10,
         lineHeight: 16,
+        fontFamily: "PoppinsRegular"
     },
     nextStepsButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#BB2B29',
-        borderRadius: 6,
+        backgroundColor: '#530404',
+        borderColor: "#ECA0A0",
+        borderWidth: 3,
+        borderRadius: 30,
         padding: 8,
     },
     nextStepsButtonText: {
         fontSize: 12,
         color: '#fff',
-        fontWeight: 'bold',
         marginRight: 4,
+        fontFamily: "PoppinsBoldItalic"
     },
 });
