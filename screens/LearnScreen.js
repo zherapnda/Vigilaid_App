@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Dimensions,
+    Image,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -221,23 +222,12 @@ const LearnScreen = () => {
                 
                                     <View style={styles.progressContainer}>
                                         <NoiseOverlay opacity={2.3} />
-                                        
-                        
-                        
-                                    <View style={styles.progressDetails}>
-                                        <View style={styles.scoreBadge}>
-                                            <Text style={styles.scorePoints}>Points:</Text>
-                                        </View>
-                                        
-                            
-                                    <View style={styles.badgeInfo}>
-                                        <View style={styles.mythIconCircle}>
-                                            <MaterialIcons name="emoji-events" size={20} color="#BB2B29" />
-                                        </View>
-                                        <Text style={styles.badgeText}>me</Text>
+                                        <Image 
+                                            source={require('../assets/images/Screenshot 2025-08-02 223932.png')}
+                                            style={styles.firstAidImage}
+                                            resizeMode="cover"
+                                        />
                                     </View>
-                                </View>
-                              </View>
                             </LinearGradient>
 
                 {/* First Aid Emergencies Section */}
@@ -273,24 +263,24 @@ const LearnScreen = () => {
                                         activeOpacity={0.8}>
                                         
                                         <View style={styles.cardContent}>
-                                            <View style={[styles.iconContainer, { backgroundColor: lesson.color + '10' }]}>
-                                                <MaterialIcons 
-                                                    name={lesson.icon} 
-                                                    size={28} 
-                                                    color={lesson.color} 
-                                                />
-                                                
-                                                {lesson.completed && (
-                                                    <View style={styles.checkBadge}>
-                                                        <MaterialIcons name="check" size={12} color="#fff" />
-                                                    </View>
-                                                )}
-
-                                                
+                                            <View style={styles.lessonHeader}>
+                                                <View style={[styles.iconContainer, { backgroundColor: lesson.color + '10' }]}>
+                                                    <MaterialIcons 
+                                                        name={lesson.icon} 
+                                                        size={28} 
+                                                        color={lesson.color} 
+                                                    />
+                                                    
+                                                    {lesson.completed && (
+                                                        <View style={styles.checkBadge}>
+                                                            <MaterialIcons name="check" size={12} color="#fff" />
+                                                        </View>
+                                                    )}
+                                                </View>
+                                                <Text style={styles.lessonTitle} numberOfLines={3}>
+                                                    {lesson.title.split(' ').join('\n')}
+                                                </Text>
                                             </View>
-                                            <Text style={styles.lessonTitle} numberOfLines={1}>
-                                                {lesson.title}
-                                            </Text>
                                     
                                             <Text style={styles.lessonSubtitle} numberOfLines={2}>
                                                 {lesson.subtitle}
@@ -356,22 +346,23 @@ const LearnScreen = () => {
                                         activeOpacity={0.8}>
                                         
                                         <View style={styles.cardContent}>
-                                            <View style={[styles.iconContainer, { backgroundColor: lesson.color + '20' }]}>
-                                                <MaterialIcons 
-                                                    name={lesson.icon} 
-                                                    size={15} 
-                                                    color={lesson.color} 
-                                                />
-                                                {lesson.completed && (
-                                                    <View style={styles.checkBadge}>
-                                                        <MaterialIcons name="check" size={12} color="#fff" />
-                                                    </View>
-                                                )}
+                                            <View style={styles.lessonHeader}>
+                                                <View style={[styles.iconContainer, { backgroundColor: lesson.color + '20' }]}>
+                                                    <MaterialIcons 
+                                                        name={lesson.icon} 
+                                                        size={15} 
+                                                        color={lesson.color} 
+                                                    />
+                                                    {lesson.completed && (
+                                                        <View style={styles.checkBadge}>
+                                                            <MaterialIcons name="check" size={12} color="#fff" />
+                                                        </View>
+                                                    )}
+                                                </View>
+                                                <Text style={styles.lessonTitle} numberOfLines={3}>
+                                                    {lesson.title.split(' ').join('\n')}
+                                                </Text>
                                             </View>
-                                            
-                                            <Text style={styles.lessonTitle} numberOfLines={1}>
-                                                {lesson.title}
-                                            </Text>
                                             <Text style={styles.lessonSubtitle} numberOfLines={2}>
                                                 {lesson.subtitle}
                                             </Text>
@@ -540,6 +531,11 @@ const styles = StyleSheet.create({
     cardContent: {
         padding: 10,
     },
+    lessonHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     iconContainer: {
         width: 40,
         height: 40,
@@ -548,7 +544,7 @@ const styles = StyleSheet.create({
         borderWidth: 1.2,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 8,
+        marginRight: 10,
         position: 'relative',
     },
     checkBadge: {
@@ -568,7 +564,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#333",
         fontFamily: "PoppinsBold",
-        marginBottom: 2,
+        flex: 1,
+        lineHeight: 16,
     },
     lessonSubtitle: {
         fontSize: 11,
@@ -678,9 +675,19 @@ const styles = StyleSheet.create({
      borderWidth: 2,
      borderColor: '#530404',
      borderRadius: 12,
-     padding: 20,
+     padding: 0,
      elevation: 5,
- },
+     overflow: 'hidden',
+     height: 120,
+     
+    },
+    firstAidImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
+        resizeMode: 'cover',
+        
+    },
 });
 
 export default LearnScreen;
