@@ -489,6 +489,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         padding: 10,
         elevation: 10,
+        height: 685
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -516,7 +517,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#530404',
         borderRadius: 12,
-        maxHeight: height * 0.6,
+        maxHeight: height * 0.67,
         paddingHorizontal: 20,
         padding: -5
     },
