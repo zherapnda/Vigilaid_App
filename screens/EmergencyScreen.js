@@ -1,33 +1,32 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  ScrollView,
-  TouchableOpacity,
-  Vibration,
-  Dimensions,
-  SafeAreaView,
-  Platform,
-} from 'react-native';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
-import * as tf from '@tensorflow/tfjs';
-import '@tensorflow/tfjs-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Dimensions,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Vibration,
+    View
+} from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
 const EmergencyScreen = () => {
   const [isListening, setIsListening] = useState(false);
   const [detectedEmergency, setDetectedEmergency] = useState(null);
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [recording, setRecording] = useState(null);
-  const [modelError, setModelError] = useState(null);
+  const [processingStatus, setProcessingStatus] = useState('');
+  const [audioLevel, setAudioLevel] = useState(0);
   
-  const modelRef = useRef(null);
   const accelerometerSubscription = useRef(null);
   const lastShakeTime = useRef(0);
+  const audioContext = useRef(null);
+  const analyser = useRef(null);
+  const microphone = useRef(null);
 
   // Your 6 emergency categories (in the same order you trained them)
   const emergencyCategories = [
@@ -144,47 +143,16 @@ const EmergencyScreen = () => {
   const initializeApp = async () => {
     try {
       console.log('🚀 Initializing emergency detector...');
+      setProcessingStatus('Setting up audio system...');
       
-      // Initialize TensorFlow
-      await tf.ready();
-      console.log('✅ TensorFlow.js ready');
-      
-      await loadModel();
-      setupShakeDetection();
       await setupAudio();
+      setupShakeDetection();
+      
+      setProcessingStatus('');
+      console.log('✅ Emergency detector initialized successfully');
     } catch (error) {
       console.error('❌ Initialization error:', error);
-      setModelError(error.message);
-    }
-  };
-
-  const loadModel = async () => {
-    try {
-      console.log('📁 Loading AI model...');
-      
-      // Load your model from assets folder
-      // The require() should work for local assets
-      const modelUrl = require('../assets/model/model.json');
-      
-      console.log('Model URL:', modelUrl);
-      
-      modelRef.current = await tf.loadLayersModel(modelUrl);
-      setIsModelLoaded(true);
-      
-      console.log('✅ Model loaded successfully');
-      console.log('📊 Model input shape:', modelRef.current.inputs[0].shape);
-      console.log('📊 Model output shape:', modelRef.current.outputs[0].shape);
-      
-    } catch (error) {
-      console.error('❌ Error loading model:', error);
-      setModelError(`Model loading failed: ${error.message}`);
-      
-      // Show helpful error message
-      Alert.alert(
-        'Model Loading Error',
-        'Could not load AI model. Make sure model.json and weights.bin are in assets/model/ folder.\n\nFalling back to manual selection mode.',
-        [{ text: 'OK' }]
-      );
+      setProcessingStatus('Initialization failed');
     }
   };
 
@@ -234,6 +202,7 @@ const EmergencyScreen = () => {
     try {
       setIsListening(true);
       setDetectedEmergency(null);
+      setProcessingStatus('Starting recording...');
       console.log('🎤 Starting to listen...');
       
       const recordingOptions = {
@@ -259,6 +228,7 @@ const EmergencyScreen = () => {
 
       const { recording: newRecording } = await Audio.Recording.createAsync(recordingOptions);
       setRecording(newRecording);
+      setProcessingStatus('Recording... (3 seconds)');
 
       // Record for 3 seconds
       setTimeout(() => {
@@ -268,6 +238,7 @@ const EmergencyScreen = () => {
     } catch (error) {
       console.error('❌ Recording error:', error);
       setIsListening(false);
+      setProcessingStatus('Recording failed');
       Alert.alert('Recording Error', 'Could not start recording');
     }
   };
@@ -276,9 +247,12 @@ const EmergencyScreen = () => {
     try {
       if (recording) {
         console.log('⏹️ Stopping recording...');
+        setProcessingStatus('Processing audio...');
+        
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
         console.log('📁 Recording saved to:', uri);
+        
         await processAudio(uri);
         setRecording(null);
       }
@@ -286,22 +260,23 @@ const EmergencyScreen = () => {
     } catch (error) {
       console.error('❌ Stop recording error:', error);
       setIsListening(false);
+      setProcessingStatus('Processing failed');
     }
   };
 
   const processAudio = async (audioUri) => {
     try {
-      console.log('🧠 Processing audio with AI...');
+      console.log('🧠 Processing audio for emergency detection...');
+      setProcessingStatus('Analyzing emergency sounds...');
       
-      if (!modelRef.current) {
-        console.log('⚠️ Model not loaded, using manual selection');
-        showEmergencySelection();
-        return;
-      }
-
-      // For now, we'll simulate AI processing since audio preprocessing is complex
-      // This simulates what your model would return
-      console.log('🎯 Running AI inference...');
+      // Simulate audio analysis with realistic emergency detection
+      // In a real implementation, you would:
+      // 1. Convert audio to spectrogram
+      // 2. Feed it to your trained model
+      // 3. Get predictions back
+      
+      // For now, we'll simulate the AI analysis
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
       
       // Simulate model prediction with realistic probabilities
       const simulatedProbabilities = Array(6).fill(0).map(() => Math.random());
@@ -320,6 +295,7 @@ const EmergencyScreen = () => {
       if (confidence > 0.3) { // Lower threshold for testing
         const detectedCategory = emergencyCategories[maxIndex];
         setDetectedEmergency(detectedCategory);
+        setProcessingStatus('Detection complete!');
         Vibration.vibrate([200, 100, 200, 100, 200]);
         
         Alert.alert(
@@ -328,6 +304,7 @@ const EmergencyScreen = () => {
           [{ text: 'Show Instructions', onPress: () => {} }]
         );
       } else {
+        setProcessingStatus('Low confidence detection');
         Alert.alert(
           '🤔 Low Confidence Detection',
           `Best guess: ${emergencyCategories[maxIndex]} (${(confidence * 100).toFixed(1)}%)\n\nPlease select manually:`,
@@ -340,6 +317,7 @@ const EmergencyScreen = () => {
       
     } catch (error) {
       console.error('❌ Audio processing error:', error);
+      setProcessingStatus('Processing failed');
       Alert.alert('Processing Error', 'Failed to process audio. Using manual selection.');
       showEmergencySelection();
     }
@@ -354,6 +332,7 @@ const EmergencyScreen = () => {
           text: emergency,
           onPress: () => {
             setDetectedEmergency(emergency);
+            setProcessingStatus('Manual selection');
             Vibration.vibrate([200, 100, 200]);
           }
         })),
@@ -401,7 +380,10 @@ const EmergencyScreen = () => {
         
         <TouchableOpacity 
           style={styles.resetButton}
-          onPress={() => setDetectedEmergency(null)}
+          onPress={() => {
+            setDetectedEmergency(null);
+            setProcessingStatus('');
+          }}
         >
           <Text style={styles.resetButtonText}>🔄 New Detection</Text>
         </TouchableOpacity>
@@ -423,14 +405,12 @@ const EmergencyScreen = () => {
             <Text style={styles.statusReady}>
               ✅ Audio Recording: READY
             </Text>
-            <Text style={[styles.statusText, isModelLoaded ? styles.statusReady : (modelError ? styles.statusError : styles.statusPending)]}>
-              {isModelLoaded ? '🤖 AI Model: LOADED' : 
-               modelError ? '❌ AI Model: ERROR' : 
-               '⏳ AI Model: Loading...'}
+            <Text style={styles.statusReady}>
+              🤖 AI Model: SIMULATED (Ready for integration)
             </Text>
-            {modelError && (
-              <Text style={styles.errorText}>
-                Using manual selection mode
+            {processingStatus && (
+              <Text style={[styles.statusText, styles.statusPending]}>
+                🔄 {processingStatus}
               </Text>
             )}
           </View>
