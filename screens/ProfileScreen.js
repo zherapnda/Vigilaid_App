@@ -1,20 +1,18 @@
-import React, { useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    Image,
-    Dimensions,
-    Animated,
-    TextInput,
-    Modal
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import NoiseOverlay from '@/components/noiseBackground';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import NoiseOverlay from '@/components/noiseBackground';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useRef, useState } from 'react';
+import {
+    Animated,
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +27,7 @@ const ProfileScreen = ({ navigation }) => {
         emergency: new Animated.Value(0),
         medical: new Animated.Value(0)
     }).current;
+    
 
     const [userProfile, setUserProfile] = useState({
         name: "John Doe",
@@ -59,7 +58,18 @@ const ProfileScreen = ({ navigation }) => {
         medications: [
             "Albuterol Inhaler - As needed",
             "Metformin - 500mg twice daily"
-        ]
+        ],
+        // Additional medical information
+        dob: "1985-06-15",
+        height: "5'10\"",
+        weight: "180 lbs",
+        primaryDoctor: "Dr. Sarah Johnson",
+        doctorPhone: "+1 (555) 123-4567",
+        insuranceProvider: "BlueCross BlueShield",
+        insuranceID: "BC123456789",
+        medicalNotes: "Regular asthma follow-ups every 6 months. Diabetes management includes A1C checks quarterly.",
+        lastPhysicalExam: "2024-01-15",
+        preferredHospital: "City Memorial Hospital"
     });
 
     const [stats] = useState({
@@ -71,18 +81,19 @@ const ProfileScreen = ({ navigation }) => {
     });
 
     const toggleSection = (section) => {
+        console.log('Toggle section:', section, 'Current:', expandedSection);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         
         if (expandedSection === section) {
             // Collapse
+            setExpandedSection(null);
             Animated.timing(animatedHeights[section], {
                 toValue: 0,
                 duration: 300,
                 useNativeDriver: false
             }).start();
-            setExpandedSection(null);
         } else {
-            // Collapse any open section
+            // Collapse any open section first
             if (expandedSection) {
                 Animated.timing(animatedHeights[expandedSection], {
                     toValue: 0,
@@ -91,53 +102,49 @@ const ProfileScreen = ({ navigation }) => {
                 }).start();
             }
             
-            // Expand new section - smaller heights to fit in box
-            const heightValue = section === 'medical' ? 120 : section === 'emergency' ? 100 : 80;
+            // Expand new section
+            const heightValue = section === 'medical' ? 280 : section === 'emergency' ? 100 : 80;
+            setExpandedSection(section);
             Animated.timing(animatedHeights[section], {
                 toValue: heightValue,
                 duration: 300,
                 useNativeDriver: false
             }).start();
-            setExpandedSection(section);
         }
     };
 
-    const InfoBox = ({ title, icon, color, section, children }) => (
-        <View style={styles.infoBoxContainer}>
-            <TouchableOpacity
-                style={[styles.infoBoxHeader, { borderColor: color }]}
-                onPress={() => toggleSection(section)}
-                activeOpacity={0.8}>
-                <View style={styles.infoBoxTitle}>
-                    <View style={[styles.iconCircle, { backgroundColor: color + '20' }]}>
-                        <MaterialIcons name={icon} size={20} color={color} />
+    const InfoBox = ({ title, icon, color, section, children }) => {
+        const isExpanded = expandedSection === section;
+        
+        return (
+            <View style={styles.infoBoxContainer}>
+                <TouchableOpacity
+                    style={[styles.infoBoxHeader, { borderColor: color }]}
+                    onPress={() => toggleSection(section)}
+                    activeOpacity={0.8}>
+                    <View style={styles.infoBoxTitle}>
+                        <View style={[styles.iconCircle, { backgroundColor: color + '20' }]}>
+                            <MaterialIcons name={icon} size={20} color={color} />
+                        </View>
+                        <Text style={styles.infoBoxTitleText}>{title}</Text>
                     </View>
-                    <Text style={styles.infoBoxTitleText}>{title}</Text>
-                </View>
-                <MaterialIcons 
-                    name={expandedSection === section ? "expand-less" : "expand-more"} 
-                    size={20} 
-                    color={color} 
-                />
-            </TouchableOpacity>
-            
-            <Animated.View 
-                style={[
-                    styles.infoBoxContent,
-                    { 
-                        maxHeight: animatedHeights[section],
-                        opacity: animatedHeights[section].interpolate({
-                            inputRange: [0, 80],
-                            outputRange: [0, 1]
-                        })
-                    }
-                ]}>
-                <View style={styles.infoBoxInner}>
-                    {children}
-                </View>
-            </Animated.View>
-        </View>
-    );
+                    <MaterialIcons 
+                        name={isExpanded ? "expand-less" : "expand-more"} 
+                        size={20} 
+                        color={color}
+                    />
+                </TouchableOpacity>
+                
+                {isExpanded && (
+                    <View style={styles.infoBoxContent}>
+                        <View style={styles.infoBoxInner}>
+                            {children}
+                        </View>
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -170,11 +177,8 @@ const ProfileScreen = ({ navigation }) => {
                         <Text style={styles.mythTitle}>User Profile</Text>
                     </View>
 
-                    <ScrollView 
+                    <View 
                         style={styles.mythContent}
-                        contentContainerStyle={styles.mythContentInner}
-                        showsVerticalScrollIndicator={false}
-                        nestedScrollEnabled={true}
                     >
                         <NoiseOverlay opacity={1.0} />
                         
@@ -284,31 +288,73 @@ const ProfileScreen = ({ navigation }) => {
                                 </View>
                             </InfoBox>
 
-                            {/* Medical Conditions & Medications */}
+                            {/* Medical History */}
                             <InfoBox 
                                 title="Medical History" 
                                 icon="medical-services" 
                                 color="#1976D2" 
                                 section="medical">
                                 <View style={styles.medicalContent}>
-                                    <View style={styles.medicalCompact}>
-                                        <Text style={styles.medicalLabel}>Blood Type: <Text style={styles.medicalValue}>{userProfile.bloodType}</Text></Text>
+                                    <View style={styles.medicalRow}>
+                                        <View style={styles.medicalColumn}>
+                                            <Text style={styles.medicalLabel}>Blood Type</Text>
+                                            <Text style={styles.medicalValue}>{userProfile.bloodType}</Text>
+                                        </View>
+                                        <View style={styles.medicalColumn}>
+                                            <Text style={styles.medicalLabel}>DOB</Text>
+                                            <Text style={styles.medicalValue}>{userProfile.dob}</Text>
+                                        </View>
                                     </View>
                                     
-                                    <View style={styles.medicalCompact}>
-                                        <Text style={styles.medicalLabel}>Conditions:</Text>
+                                    <View style={styles.medicalRow}>
+                                        <View style={styles.medicalColumn}>
+                                            <Text style={styles.medicalLabel}>Height</Text>
+                                            <Text style={styles.medicalValue}>{userProfile.height}</Text>
+                                        </View>
+                                        <View style={styles.medicalColumn}>
+                                            <Text style={styles.medicalLabel}>Weight</Text>
+                                            <Text style={styles.medicalValue}>{userProfile.weight}</Text>
+                                        </View>
+                                    </View>
+                                    
+                                    <View style={styles.medicalSection}>
+                                        <Text style={styles.medicalLabel}>Primary Doctor</Text>
+                                        <Text style={styles.medicalValue}>{userProfile.primaryDoctor}</Text>
+                                        <Text style={styles.medicalItem}>{userProfile.doctorPhone}</Text>
+                                    </View>
+                                    
+                                    <View style={styles.medicalSection}>
+                                        <Text style={styles.medicalLabel}>Insurance</Text>
+                                        <Text style={styles.medicalValue}>{userProfile.insuranceProvider}</Text>
+                                        <Text style={styles.medicalItem}>ID: {userProfile.insuranceID}</Text>
+                                    </View>
+                                    
+                                    <View style={styles.medicalSection}>
+                                        <Text style={styles.medicalLabel}>Conditions</Text>
                                         <Text style={styles.medicalItem}>{userProfile.medicalConditions.join(', ')}</Text>
                                     </View>
                                     
-                                    <View style={styles.medicalCompact}>
-                                        <Text style={styles.medicalLabel}>Medications:</Text>
-                                        <Text style={styles.medicalItem}>{userProfile.medications.length} prescribed</Text>
+                                    <View style={styles.medicalSection}>
+                                        <Text style={styles.medicalLabel}>Medications ({userProfile.medications.length})</Text>
+                                        {userProfile.medications.slice(0, 2).map((med, idx) => (
+                                            <Text key={idx} style={styles.medicalItem}>• {med}</Text>
+                                        ))}
+                                    </View>
+                                    
+                                    <View style={styles.medicalSection}>
+                                        <Text style={styles.medicalLabel}>Last Physical</Text>
+                                        <Text style={styles.medicalItem}>{userProfile.lastPhysicalExam}</Text>
+                                    </View>
+                                    
+                                    <View style={styles.medicalSection}>
+                                        <Text style={styles.medicalLabel}>Preferred Hospital</Text>
+                                        <Text style={styles.medicalItem}>{userProfile.preferredHospital}</Text>
                                     </View>
                                 </View>
                             </InfoBox>
                         </View>
                         
-                    </ScrollView>
+                    </View>
 
                     <View style={styles.section}>
                             <Text style={styles.sectionTitle}></Text>
@@ -382,10 +428,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#530404',
         borderRadius: 12,
-        height: 450, // Fixed height to prevent overflow
         paddingHorizontal: 15,
-    },
-    mythContentInner: {
         paddingVertical: 15,
     },
     profileSection: {
@@ -626,6 +669,15 @@ const styles = StyleSheet.create({
     medicalContent: {
         paddingTop: 8,
     },
+    medicalRow: {
+        flexDirection: 'row',
+        marginBottom: 10,
+        justifyContent: 'space-between',
+    },
+    medicalColumn: {
+        flex: 1,
+        marginRight: 8,
+    },
     medicalCompact: {
         marginBottom: 6,
     },
@@ -633,21 +685,23 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     medicalLabel: {
-        fontSize: 12,
+        fontSize: 11,
         color: '#666',
-        fontWeight: '500',
-        marginBottom: 3,
+        fontWeight: '600',
+        marginBottom: 2,
+        fontFamily: "PoppinsSemiBold"
     },
     medicalValue: {
-        fontSize: 14,
+        fontSize: 13,
         color: '#333',
         fontWeight: 'bold',
+        fontFamily: "PoppinsBold"
     },
     medicalItem: {
         fontSize: 11,
         color: '#333',
         marginTop: 2,
-        fontStyle: 'italic',
+        fontFamily: "PoppinsRegular"
     },
     nextStepsCard: {
         backgroundColor: '#fff',

@@ -1,5 +1,6 @@
 import NoiseOverlay from '@/components/noiseBackground';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Video } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Dimensions,
+    Image,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -362,6 +364,31 @@ const LessonScreen = () => {
                             showsVerticalScrollIndicator={false}
                             nestedScrollEnabled={true}
                         >
+                            {/* Display video if available */}
+                            {currentSectionData.video && (
+                                <View style={styles.videoContainer}>
+                                    <Video 
+                                        source={currentSectionData.video}
+                                        style={styles.lessonVideo}
+                                        shouldPlay={false}
+                                        isLooping={false}
+                                        resizeMode="contain"
+                                        useNativeControls={true}
+                                    />
+                                </View>
+                            )}
+                            
+                            {/* Display image if available (and no video) */}
+                            {currentSectionData.image && !currentSectionData.video && (
+                                <View style={styles.imageContainer}>
+                                    <Image 
+                                        source={currentSectionData.image} 
+                                        style={styles.lessonImage}
+                                        resizeMode="contain"
+                                    />
+                                </View>
+                            )}
+                            
                             {formattedContent.map(line => renderContentLine(line))}
                         </ScrollView>
                     </Animated.View>
@@ -523,6 +550,28 @@ const styles = StyleSheet.create({
     },
     textContent: {
         paddingVertical: 20,
+    },
+    imageContainer: {
+        marginBottom: 20,
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    lessonImage: {
+        width: width - 80,
+        height: 300,
+        borderRadius: 12,
+        borderWidth: 3,
+        borderColor: '#530404',
+    },
+    videoContainer: {
+        marginBottom: 20,
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    lessonVideo: {
+        width: width - 80,
+        height: 300,
+        borderRadius: 12,
     },
     header1: {
         fontSize: 22,

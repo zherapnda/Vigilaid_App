@@ -1,15 +1,16 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions} from 'react-native';
-import {LinearGradient} from 'expo-linear-gradient';
-import {MaterialIcons} from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import NoiseOverlay from '@/components/noiseBackground';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const {width} = Dimensions.get('window');
 
 const HomeScreen = () => {
+    const router = useRouter();
     const[isListening, setListening] = useState(false);
     const[showTruth, setShowTruth] = useState(false);
     const[userStats] = useState({
@@ -20,11 +21,8 @@ const HomeScreen = () => {
     });
 
     const handleEmergencyAlert = () => {
-        Alert.alert(
-            'Emergency Alert',
-            'GPS Location shared with emergency contacts.',
-            [{text: 'OK', onPress: () => console.log('Alert acknowledged')}],
-        );
+        console.log('🚨 Emergency Alert pressed - navigating to EmergencyScreen');
+        router.push('/emergency');
     };
 
     const handleSendLocation = () => {
@@ -37,8 +35,8 @@ const HomeScreen = () => {
     }
 
     const [mythOfTheDay] = useState({
-        myth: "Yelling for help is the best way to get attention. This is very wrong because we live in the 21st century, no one cares about each other.",
-        truth: "Making noise with objects or using a whistle is more effective and preserves your voice",
+        myth: "Tilting your head back for nosebleed will stop the bleeding.",
+        truth: "This causes your stomatch to be irritated with blood, instead lean forward",
         imageUrl: "path/to/myth-image.png" // or you can use an icon name
     });
 

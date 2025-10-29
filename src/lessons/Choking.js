@@ -199,8 +199,7 @@ You'll know it worked when you hear:
 
 The difference between a hero and a bystander isn't training - it's the willingness to act when someone's life depends on it.
       `,
-      image : require('../../assets/images/Screenshot 2025-08-03 154139.png'),
-      image: require('../../assets/images/Screenshot 2025-08-03 154053.png')
+      image: require('../../assets/images/UPPER AIRWAY OBSTRUCTION AND THE HEIMLICH MANEUVER.jpg')
     },
     {
       title: "Helping Infants",
@@ -342,7 +341,7 @@ Even if successful, **call the pediatrician**. The baby should be checked for:
 
 The difference between tragedy and triumph often comes down to one prepared person who was willing to act. Today, that person is you.
       `,
-      image: null
+      image: require('../../assets/images/Screenshot 2025-10-26 140425.png')
     }
   ]
 };

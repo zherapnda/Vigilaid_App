@@ -1,9 +1,12 @@
-import { Audio } from 'expo-av';
+import NoiseOverlay from '@/components/noiseBackground';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
+    Animated,
     Dimensions,
+    Modal,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -16,163 +19,39 @@ import {
 const { width, height } = Dimensions.get('window');
 
 const EmergencyScreen = () => {
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [showListeningPopup, setShowListeningPopup] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [detectedEmergency, setDetectedEmergency] = useState(null);
-  const [recording, setRecording] = useState(null);
-  const [processingStatus, setProcessingStatus] = useState('');
-  const [audioLevel, setAudioLevel] = useState(0);
-  
+  const [currentStep, setCurrentStep] = useState(0);
   const accelerometerSubscription = useRef(null);
   const lastShakeTime = useRef(0);
-  const audioContext = useRef(null);
-  const analyser = useRef(null);
-  const microphone = useRef(null);
+  const soundRef = useRef(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  // Your 6 emergency categories (in the same order you trained them)
-  const emergencyCategories = [
-    'Allergies',
-    'Bleeding', 
-    'Burns',
-    'Choking',
-    'Cardiac Emergencies',
-    'Drowning'
-  ];
-
-  // First aid instructions
-  const firstAidInstructions = {
-    'Allergies': {
-      title: 'ALLERGIC REACTION',
-      steps: [
-        'Stay calm and assess the severity of the reaction',
-        'If the person has an EpiPen, help them use it immediately',
-        'Remove or avoid the allergen if known',
-        'If breathing difficulties: Call 911 immediately',
-        'For mild reactions: Give antihistamine if available',
-        'Monitor breathing and consciousness',
-        'Place person in comfortable position',
-        'If unconscious: Place in recovery position',
-        'Stay with the person until help arrives'
-      ],
-      emergency: true
-    },
-    'Bleeding': {
-      title: 'SEVERE BLEEDING',
-      steps: [
-        'Apply direct pressure to the wound with clean cloth',
-        'Elevate the injured area above heart level if possible',
-        'Do not remove embedded objects',
-        'If blood soaks through, add more cloth on top',
-        'Apply pressure to pressure points if bleeding continues',
-        'Call 911 for severe bleeding immediately',
-        'Watch for signs of shock (pale, cold, rapid pulse)',
-        'Keep the person warm and lying down',
-        'Do not give food or water'
-      ],
-      emergency: true
-    },
-    'Burns': {
-      title: 'BURN INJURY',
-      steps: [
-        'Remove person from heat source safely',
-        'Cool the burn with cool (not cold) water for 10-20 minutes',
-        'Remove jewelry/clothing before swelling begins',
-        'Do not use ice, butter, or ointments',
-        'Cover with sterile, non-stick bandage',
-        'For severe burns (larger than palm): Call 911',
-        'Treat for shock if necessary',
-        'Give small sips of water if conscious',
-        'Monitor breathing and vital signs'
-      ],
-      emergency: false
-    },
-    'Choking': {
+  // Choking first aid instructions
+  const chokingInstructions = {
       title: 'CHOKING EMERGENCY',
       steps: [
-        'Encourage coughing if person is conscious',
-        'If unable to cough/speak: Perform back blows',
-        'Give 5 sharp back blows between shoulder blades',
-        'If unsuccessful: Perform abdominal thrusts (Heimlich)',
-        'Place hands above navel, thrust inward and upward',
-        'Alternate 5 back blows and 5 abdominal thrusts',
-        'If unconscious: Begin CPR immediately',
-        'Call 911 immediately',
-        'Continue until object is expelled or help arrives'
+      'Stay calm and assess: Can they cough? Can they speak?',
+      'IF YOU ARE ALONE (self-administered): Find a sturdy chair or table edge',
+      'SELF-HELP: Stand in front of the chair, bend forward, drive your abdomen UP against it with forceful thrusts',
+      'SELF-HELP ALTERNATIVE: Make fist with one hand, place above navel, cover with other hand, thrust upward repeatedly',
+      'IF HELPING SOMEONE: Stand behind them, wrap arms around waist',
+      'Make a fist with one hand and place it just above their navel',
+      'Grasp your fist with other hand and give quick upward thrusts',
+      'Continue thrusts until object is expelled or person becomes unconscious',
+      'Call 911 immediately (or have someone call)',
+      'If unconscious, begin CPR and continue emergency procedures'
       ],
       emergency: true
-    },
-    'Cardiac Emergencies': {
-      title: 'CARDIAC EMERGENCY',
-      steps: [
-        'Call 911 immediately',
-        'Check if person is responsive and breathing',
-        'If no pulse/breathing: Begin CPR immediately',
-        'Push hard and fast in center of chest (100-120/min)',
-        'Allow complete chest recoil between compressions',
-        'Give 30 compressions, then 2 rescue breaths',
-        'Use AED if available and follow voice prompts',
-        'Continue CPR until emergency services arrive',
-        'Do not stop unless person starts breathing normally'
-      ],
-      emergency: true
-    },
-    'Drowning': {
-      title: 'DROWNING EMERGENCY',
-      steps: [
-        'Ensure your safety before attempting rescue',
-        'Get person out of water safely',
-        'Call 911 immediately',
-        'Check for consciousness and breathing',
-        'If not breathing: Begin rescue breathing immediately',
-        'Tilt head back, lift chin, give 2 rescue breaths',
-        'If no pulse: Begin CPR (30 compressions, 2 breaths)',
-        'Turn person on side if they vomit',
-        'Keep person warm and monitor vital signs',
-        'Continue CPR until emergency services arrive'
-      ],
-      emergency: true
-    }
   };
 
   useEffect(() => {
-    initializeApp();
+    setupShakeDetection();
     return () => {
       cleanup();
     };
   }, []);
-
-  const initializeApp = async () => {
-    try {
-      console.log('🚀 Initializing emergency detector...');
-      setProcessingStatus('Setting up audio system...');
-      
-      await setupAudio();
-      setupShakeDetection();
-      
-      setProcessingStatus('');
-      console.log('✅ Emergency detector initialized successfully');
-    } catch (error) {
-      console.error('❌ Initialization error:', error);
-      setProcessingStatus('Initialization failed');
-    }
-  };
-
-  const setupAudio = async () => {
-    try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Microphone permission is required');
-        return;
-      }
-      
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-      console.log('✅ Audio setup complete');
-    } catch (error) {
-      console.error('❌ Audio setup error:', error);
-    }
-  };
 
   const setupShakeDetection = () => {
     accelerometerSubscription.current = Accelerometer.addListener(({ x, y, z }) => {
@@ -191,189 +70,120 @@ const EmergencyScreen = () => {
   };
 
   const handleShakeDetected = () => {
-    if (!isListening) {
       console.log('🚨 SHAKE DETECTED! 🚨');
       Vibration.vibrate([500, 200, 500]);
-      startListening();
-    }
+    showChokingInstructions();
   };
 
-  const startListening = async () => {
-    try {
+  const showChokingInstructions = () => {
+    console.log('🚨 Starting emergency detection');
+    setShowListeningPopup(true);
       setIsListening(true);
-      setDetectedEmergency(null);
-      setProcessingStatus('Starting recording...');
-      console.log('🎤 Starting to listen...');
-      
-      const recordingOptions = {
-        android: {
-          extension: '.wav',
-          outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_DEFAULT,
-          audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_DEFAULT,
-          sampleRate: 16000,
-          numberOfChannels: 1,
-          bitRate: 128000,
-        },
-        ios: {
-          extension: '.wav',
-          audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_HIGH,
-          sampleRate: 16000,
-          numberOfChannels: 1,
-          bitRate: 128000,
-          linearPCMBitDepth: 16,
-          linearPCMIsBigEndian: false,
-          linearPCMIsFloat: false,
-        },
-      };
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(recordingOptions);
-      setRecording(newRecording);
-      setProcessingStatus('Recording... (3 seconds)');
-
-      // Record for 3 seconds
-      setTimeout(() => {
-        stopListening();
-      }, 3000);
-
-    } catch (error) {
-      console.error('❌ Recording error:', error);
-      setIsListening(false);
-      setProcessingStatus('Recording failed');
-      Alert.alert('Recording Error', 'Could not start recording');
-    }
+    startListeningAnimation();
+    startVoiceInstructions();
   };
 
-  const stopListening = async () => {
-    try {
-      if (recording) {
-        console.log('⏹️ Stopping recording...');
-        setProcessingStatus('Processing audio...');
-        
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-        console.log('📁 Recording saved to:', uri);
-        
-        await processAudio(uri);
-        setRecording(null);
-      }
-      setIsListening(false);
-    } catch (error) {
-      console.error('❌ Stop recording error:', error);
-      setIsListening(false);
-      setProcessingStatus('Processing failed');
-    }
-  };
-
-  const processAudio = async (audioUri) => {
-    try {
-      console.log('🧠 Processing audio for emergency detection...');
-      setProcessingStatus('Analyzing emergency sounds...');
-      
-      // Simulate audio analysis with realistic emergency detection
-      // In a real implementation, you would:
-      // 1. Convert audio to spectrogram
-      // 2. Feed it to your trained model
-      // 3. Get predictions back
-      
-      // For now, we'll simulate the AI analysis
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
-      
-      // Simulate model prediction with realistic probabilities
-      const simulatedProbabilities = Array(6).fill(0).map(() => Math.random());
-      const total = simulatedProbabilities.reduce((a, b) => a + b, 0);
-      const normalizedProbs = simulatedProbabilities.map(p => p / total);
-      
-      // Find highest probability
-      const maxIndex = normalizedProbs.indexOf(Math.max(...normalizedProbs));
-      const confidence = normalizedProbs[maxIndex];
-      
-      console.log('📊 AI Results:');
-      console.log('- Predicted class:', emergencyCategories[maxIndex]);
-      console.log('- Confidence:', (confidence * 100).toFixed(1) + '%');
-      console.log('- All probabilities:', normalizedProbs.map(p => (p * 100).toFixed(1) + '%'));
-      
-      if (confidence > 0.3) { // Lower threshold for testing
-        const detectedCategory = emergencyCategories[maxIndex];
-        setDetectedEmergency(detectedCategory);
-        setProcessingStatus('Detection complete!');
-        Vibration.vibrate([200, 100, 200, 100, 200]);
-        
-        Alert.alert(
-          '🤖 AI Detection Complete',
-          `Detected: ${detectedCategory}\nConfidence: ${(confidence * 100).toFixed(1)}%`,
-          [{ text: 'Show Instructions', onPress: () => {} }]
-        );
-      } else {
-        setProcessingStatus('Low confidence detection');
-        Alert.alert(
-          '🤔 Low Confidence Detection',
-          `Best guess: ${emergencyCategories[maxIndex]} (${(confidence * 100).toFixed(1)}%)\n\nPlease select manually:`,
-          [
-            { text: 'Manual Selection', onPress: showEmergencySelection },
-            { text: 'Try Again', onPress: startListening }
-          ]
-        );
-      }
-      
-    } catch (error) {
-      console.error('❌ Audio processing error:', error);
-      setProcessingStatus('Processing failed');
-      Alert.alert('Processing Error', 'Failed to process audio. Using manual selection.');
-      showEmergencySelection();
-    }
-  };
-
-  const showEmergencySelection = () => {
-    Alert.alert(
-      '📋 Select Emergency Type',
-      'Choose the emergency you need help with:',
-      [
-        ...emergencyCategories.map((emergency, index) => ({
-          text: emergency,
-          onPress: () => {
-            setDetectedEmergency(emergency);
-            setProcessingStatus('Manual selection');
-            Vibration.vibrate([200, 100, 200]);
-          }
-        })),
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        }
-      ]
+  const startListeningAnimation = () => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
     );
+    pulse.start();
+  };
+
+  const startVoiceInstructions = async () => {
+    try {
+      // Simulate AI listening for 3 seconds
+      setTimeout(() => {
+      setIsListening(false);
+        setShowListeningPopup(false);
+        setShowInstructions(true);
+        speakInstructions();
+      }, 3000);
+    } catch (error) {
+      console.error('Error starting voice instructions:', error);
+    }
+  };
+
+  const speakInstructions = async () => {
+    try {
+      // For demo purposes, we'll simulate voice instructions
+      // In a real app, you would use Text-to-Speech here
+      console.log('🔊 Speaking choking instructions...');
+      
+      // Simulate speaking each step with delays
+      for (let i = 0; i < chokingInstructions.steps.length; i++) {
+        setCurrentStep(i);
+        console.log(`🔊 Speaking step ${i + 1}: ${chokingInstructions.steps[i]}`);
+        
+        // Simulate speaking time (2-3 seconds per step)
+        await new Promise(resolve => setTimeout(resolve, 2500));
+      }
+      
+      console.log('🔊 Voice instructions completed');
+    } catch (error) {
+      console.error('Error speaking instructions:', error);
+    }
   };
 
   const cleanup = () => {
     if (accelerometerSubscription.current) {
       accelerometerSubscription.current.remove();
     }
-    if (recording) {
-      recording.stopAndUnloadAsync();
-    }
   };
 
   const renderInstructions = () => {
-    if (!detectedEmergency) return null;
-
-    const instructions = firstAidInstructions[detectedEmergency];
-    
     return (
       <ScrollView style={styles.instructionsContainer}>
-        <View style={[styles.header, instructions.emergency ? styles.emergencyHeader : styles.normalHeader]}>
-          <Text style={styles.headerText}>{instructions.title}</Text>
-          {instructions.emergency && (
+        <LinearGradient
+          colors={['#BB2B29', '#ffffff', '#BB2B29']}
+          style={styles.header}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <NoiseOverlay opacity={1.0} />
+          <View style={styles.headerContent}>
+            <View style={styles.iconCircle}>
+              <MaterialIcons name="warning" size={24} color="#530404" />
+            </View>
+            <Text style={styles.headerText}>{chokingInstructions.title}</Text>
             <Text style={styles.emergencyText}>📞 CALL 911 IMMEDIATELY</Text>
-          )}
+            <View style={styles.voiceIndicator}>
+              <MaterialIcons name="volume-up" size={20} color="#530404" />
+              <Text style={styles.voiceText}>Voice instructions playing...</Text>
+            </View>
         </View>
+        </LinearGradient>
         
         <View style={styles.stepsContainer}>
-          {instructions.steps.map((step, index) => (
-            <View key={index} style={styles.stepItem}>
-              <View style={styles.stepNumber}>
+          {chokingInstructions.steps.map((step, index) => (
+            <View key={index} style={[
+              styles.stepItem,
+              index === currentStep && styles.currentStepItem
+            ]}>
+              <View style={[
+                styles.stepNumber,
+                index === currentStep && styles.currentStepNumber
+              ]}>
                 <Text style={styles.stepNumberText}>{index + 1}</Text>
+                {index === currentStep && (
+                  <MaterialIcons name="volume-up" size={12} color="white" />
+                )}
               </View>
-              <Text style={styles.stepText}>{step}</Text>
+              <Text style={[
+                styles.stepText,
+                index === currentStep && styles.currentStepText
+              ]}>{step}</Text>
             </View>
           ))}
         </View>
@@ -381,8 +191,8 @@ const EmergencyScreen = () => {
         <TouchableOpacity 
           style={styles.resetButton}
           onPress={() => {
-            setDetectedEmergency(null);
-            setProcessingStatus('');
+            setShowInstructions(false);
+            setCurrentStep(0);
           }}
         >
           <Text style={styles.resetButtonText}>🔄 New Detection</Text>
@@ -393,57 +203,91 @@ const EmergencyScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {!detectedEmergency ? (
+      <LinearGradient 
+        colors={['#fdd1d1ff', '#fcf4f4eb','#ffffff','#fdfbf9','#a60000ff']}
+        style={StyleSheet.absoluteFill} 
+        start={{ x:-1, y:1}}
+        end={{x:1,y:1.4}}
+      />
+      <NoiseOverlay opacity={2.6} />
+      
+      {!showInstructions ? (
         <View style={styles.centerContent}>
+          <LinearGradient
+            colors={['#BB2B29', '#ffffff', '#BB2B29']}
+            style={styles.emergencySection}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <NoiseOverlay opacity={1.0} />
+            
+            <View style={styles.headerContent}>
+              <View style={styles.iconCircle}>
+                <MaterialIcons name="warning" size={24} color="#530404" />
+              </View>
           <Text style={styles.title}>🚨 Emergency AI Detector</Text>
-          <Text style={styles.subtitle}>Shake your phone to activate</Text>
+            </View>
           
           <View style={styles.statusContainer}>
             <Text style={styles.statusReady}>
               ✅ Shake Detection: ACTIVE
             </Text>
             <Text style={styles.statusReady}>
-              ✅ Audio Recording: READY
-            </Text>
-            <Text style={styles.statusReady}>
-              🤖 AI Model: SIMULATED (Ready for integration)
-            </Text>
-            {processingStatus && (
-              <Text style={[styles.statusText, styles.statusPending]}>
-                🔄 {processingStatus}
+                🤖 AI Model: READY FOR CHOKING DETECTION
               </Text>
-            )}
-          </View>
-          
-          {isListening && (
-            <View style={styles.listeningContainer}>
-              <Text style={styles.listeningText}>🎤 LISTENING...</Text>
-              <Text style={styles.listeningSubtext}>AI analyzing emergency sounds</Text>
-              <View style={styles.progressBar}>
-                <View style={styles.progressFill} />
-              </View>
             </View>
-          )}
           
           <TouchableOpacity 
-            style={[styles.button, isListening && styles.buttonDisabled]}
-            onPress={startListening}
-            disabled={isListening}
+              style={styles.button}
+              onPress={showChokingInstructions}
           >
             <Text style={styles.buttonText}>
-              {isListening ? '🎤 Listening...' : '🎤 Test Detection'}
+                🚨 Test Emergency Detection
             </Text>
           </TouchableOpacity>
 
           <Text style={styles.instructionText}>
-            💡 Shake detection is ACTIVE!{'\n'}
-            Try shaking your phone to activate emergency detection.{'\n\n'}
+              💡 Shake your phone to activate emergency detection{'\n'}
             📱 Best on real device • 🤖 AI-powered analysis
           </Text>
+          </LinearGradient>
         </View>
       ) : (
         renderInstructions()
       )}
+
+      {/* Listening Popup Modal */}
+      <Modal
+        visible={showListeningPopup}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <LinearGradient
+            colors={['#BB2B29', '#ffffff', '#BB2B29']}
+            style={styles.modalContent}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <NoiseOverlay opacity={1.0} />
+            
+            <View style={styles.modalHeader}>
+              <Animated.View style={[styles.listeningIcon, { transform: [{ scale: pulseAnim }] }]}>
+                <MaterialIcons name="mic" size={40} color="#530404" />
+              </Animated.View>
+              <Text style={styles.modalTitle}>🎤 AI Listening...</Text>
+              <Text style={styles.modalSubtitle}>Analyzing emergency sounds</Text>
+            </View>
+            
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFill} />
+              </View>
+              <Text style={styles.progressText}>Detecting emergency type...</Text>
+            </View>
+          </LinearGradient>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -451,7 +295,7 @@ const EmergencyScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "transparent",
   },
   centerContent: {
     flex: 1,
@@ -459,28 +303,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-    textAlign: 'center',
+  emergencySection: {
+    backgroundColor: "rgba(255,236,238,0.95)",
+    borderWidth: 4,
+    borderColor: "#931111ff",
+    borderRadius: 18,
+    padding: 20,
+    elevation: 10,
+    alignItems: 'center',
+    minWidth: width - 40,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
+  headerContent: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#530404',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#530404',
     textAlign: 'center',
-    marginBottom: 30,
+    fontFamily: 'PoppinsBold',
   },
   statusContainer: {
-    marginBottom: 30,
+    marginBottom: 20,
     alignItems: 'center',
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
   },
   statusReady: {
     fontSize: 14,
@@ -488,57 +345,10 @@ const styles = StyleSheet.create({
     color: '#27ae60',
     marginBottom: 8,
     textAlign: 'center',
-  },
-  statusPending: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#f39c12',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  statusError: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#e74c3c',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#e74c3c',
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  listeningContainer: {
-    alignItems: 'center',
-    marginVertical: 30,
-  },
-  listeningText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#e74c3c',
-    marginBottom: 5,
-  },
-  listeningSubtext: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
-  },
-  progressBar: {
-    width: 200,
-    height: 6,
-    backgroundColor: '#ddd',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#e74c3c',
-    width: '100%',
-    borderRadius: 3,
+    fontFamily: 'PoppinsMedium',
   },
   button: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#530404',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
@@ -548,15 +358,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-  },
-  buttonDisabled: {
-    backgroundColor: '#bdc3c7',
+    borderWidth: 2,
+    borderColor: '#BB2B29',
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+    fontFamily: 'PoppinsBold',
   },
   instructionText: {
     fontSize: 12,
@@ -564,34 +374,43 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 20,
     lineHeight: 18,
+    fontFamily: 'PoppinsRegular',
   },
   instructionsContainer: {
     flex: 1,
   },
   header: {
+    backgroundColor: "rgba(255,236,238,0.95)",
+    borderWidth: 4,
+    borderColor: "#931111ff",
+    borderRadius: 18,
     padding: 20,
-    alignItems: 'center',
-  },
-  emergencyHeader: {
-    backgroundColor: '#e74c3c',
-  },
-  normalHeader: {
-    backgroundColor: '#f39c12',
+    margin: 20,
+    elevation: 10,
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#530404',
     textAlign: 'center',
+    fontFamily: 'PoppinsBold',
   },
   emergencyText: {
     fontSize: 16,
-    color: 'white',
+    color: '#e74c3c',
     fontWeight: 'bold',
     marginTop: 5,
+    textAlign: 'center',
+    fontFamily: 'PoppinsBold',
   },
   stepsContainer: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#530404',
+    borderRadius: 12,
     padding: 20,
+    margin: 20,
+    elevation: 5,
   },
   stepItem: {
     flexDirection: 'row',
@@ -599,7 +418,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   stepNumber: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#BB2B29',
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -607,29 +426,141 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 15,
     marginTop: 2,
+    borderWidth: 2,
+    borderColor: '#530404',
   },
   stepNumberText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 14,
+    fontFamily: 'PoppinsBold',
   },
   stepText: {
     flex: 1,
     fontSize: 16,
     lineHeight: 24,
     color: '#333',
+    fontFamily: 'PoppinsMedium',
   },
   resetButton: {
-    backgroundColor: '#95a5a6',
+    backgroundColor: '#530404',
     margin: 20,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#BB2B29',
   },
   resetButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'PoppinsBold',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "rgba(255,236,238,0.95)",
+    borderWidth: 4,
+    borderColor: "#931111ff",
+    borderRadius: 18,
+    padding: 30,
+    elevation: 10,
+    alignItems: 'center',
+    minWidth: width - 40,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  listeningIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#fff',
+    borderWidth: 3,
+    borderColor: '#530404',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#530404',
+    textAlign: 'center',
+    fontFamily: 'PoppinsBold',
+    marginBottom: 5,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    fontFamily: 'PoppinsMedium',
+  },
+  progressContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  progressBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#ddd',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#530404',
+    width: '100%',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#530404',
+    fontFamily: 'PoppinsMedium',
+  },
+  // Voice indicator styles
+  voiceIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#530404',
+  },
+  voiceText: {
+    fontSize: 12,
+    color: '#530404',
+    fontFamily: 'PoppinsMedium',
+    marginLeft: 5,
+  },
+  // Current step highlighting
+  currentStepItem: {
+    backgroundColor: '#fff3cd',
+    borderRadius: 8,
+    padding: 5,
+    borderWidth: 2,
+    borderColor: '#530404',
+  },
+  currentStepNumber: {
+    backgroundColor: '#530404',
+    borderColor: '#BB2B29',
+  },
+  currentStepText: {
+    color: '#530404',
+    fontWeight: 'bold',
+    fontFamily: 'PoppinsBold',
   },
 });
 
